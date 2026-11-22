@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications · CivicEvents+</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body data-page="notifications" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+  <div id="site-header"></div>
+
+  <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 py-8" tabindex="-1">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold">Notifications</h1>
+        <p class="mt-1 text-slate-600">City-wide updates and messages for you.</p>
+      </div>
+      <button type="button" id="mark-all" class="btn btn-secondary">Mark all as read</button>
+    </div>
+
+    <!-- ROLE GUARD (UI): admin explanation of the delete controls -->
+    <p class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900" data-role="admin" hidden>
+      <strong>Admin:</strong> deleting a notification removes it for every resident. New notifications are created automatically when you publish events, announcements or promos.
+    </p>
+
+    <div class="mt-6 flex gap-2 border-b border-slate-200" role="tablist" aria-label="Filter notifications">
+      <button type="button" role="tab" id="tab-all" data-filter="all" aria-selected="true" aria-controls="notif-items" class="tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold">All <span class="count"></span></button>
+      <button type="button" role="tab" id="tab-unread" data-filter="unread" aria-selected="false" aria-controls="notif-items" tabindex="-1" class="tab -mb-px border-b-2 px-4 py-2 text-sm font-semibold">Unread <span class="count"></span></button>
+    </div>
+
+    <div class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <ul id="notif-items" role="tabpanel" aria-labelledby="tab-all" class="space-y-2" aria-busy="true"></ul>
+      <!-- Detail of the selected notification -->
+      <section id="notif-detail" class="h-fit rounded-xl border border-slate-200 bg-white p-6 lg:sticky lg:top-24" aria-live="polite" aria-label="Notification details">
+        <p class="text-slate-600">Select a notification to read it in full.</p>
+      </section>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/notifications.js"></script>
+</body>
+</html>
