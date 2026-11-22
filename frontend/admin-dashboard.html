@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin dashboard · CivicEvents+</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body data-page="admin-dashboard" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+  <div id="site-header"></div>
+
+  <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 lg:grid lg:grid-cols-[13rem_1fr] lg:gap-8" tabindex="-1">
+    <div id="admin-nav"></div>
+
+    <div class="min-w-0">
+      <div class="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 class="text-3xl font-bold">Admin dashboard</h1>
+          <p class="mt-1 text-slate-600">Live numbers from the CivicEvents+ database. <span id="updated" aria-live="polite"></span></p>
+        </div>
+        <button type="button" id="refresh" class="btn btn-secondary">↻ Refresh</button>
+      </div>
+
+      <section aria-labelledby="totals-heading" class="mt-6">
+        <h2 id="totals-heading" class="sr-only">Totals</h2>
+        <div id="tiles" class="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-busy="true"></div>
+      </section>
+
+      <div class="mt-8 grid gap-6 xl:grid-cols-2">
+        <section class="rounded-xl border border-slate-200 bg-white p-5" aria-labelledby="activity-heading">
+          <div class="flex items-start justify-between gap-2">
+            <div><h2 id="activity-heading" class="font-semibold">Platform activity</h2>
+              <p class="text-sm text-slate-600">Totals by content type</p></div>
+            <button type="button" class="table-toggle text-sm font-semibold text-teal-800 underline" aria-controls="activity-table" aria-expanded="false">Show as table</button>
+          </div>
+          <div id="activity-chart" class="mt-4"></div>
+          <div id="activity-table" class="mt-4 hidden"></div>
+        </section>
+
+        <section class="rounded-xl border border-slate-200 bg-white p-5" aria-labelledby="growth-heading">
+          <div class="flex items-start justify-between gap-2">
+            <div><h2 id="growth-heading" class="font-semibold">New users per month</h2>
+              <p class="text-sm text-slate-600">Sign-ups over the last 6 months</p></div>
+            <button type="button" class="table-toggle text-sm font-semibold text-teal-800 underline" aria-controls="growth-table" aria-expanded="false">Show as table</button>
+          </div>
+          <div id="growth-chart" class="mt-4"></div>
+          <div id="growth-table" class="mt-4 hidden"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+  <div id="chart-tip" class="pointer-events-none fixed z-50 hidden rounded-md bg-slate-900 px-2 py-1 text-xs font-semibold text-white shadow" role="presentation"></div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/admin-dashboard.js"></script>
+</body>
+</html>
