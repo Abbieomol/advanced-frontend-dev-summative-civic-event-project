@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create an account · CivicEvents+</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900">
+  <main id="main" class="flex min-h-screen items-center justify-center p-6">
+    <div class="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+      <p class="font-bold text-teal-800">CivicEvents+</p>
+      <h1 class="mt-2 text-3xl font-bold">Create your account</h1>
+      <p class="mt-2 text-slate-600">Already registered? <a href="login.html" class="font-semibold text-teal-800 underline">Sign in</a></p>
+
+      <form id="signup-form" class="mt-6 space-y-5" novalidate>
+        <div class="form-alert hidden rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900" role="alert"></div>
+
+        <div class="field">
+          <label for="full_name" class="label">Full name</label>
+          <input id="full_name" name="full_name" type="text" autocomplete="name" required class="input">
+        </div>
+
+        <div class="field">
+          <label for="email" class="label">Email address</label>
+          <input id="email" name="email" type="email" autocomplete="email" required class="input">
+        </div>
+
+        <div class="field">
+          <label for="password" class="label">Password</label>
+          <div class="relative">
+            <input id="password" name="password" type="password" autocomplete="new-password" required class="input pr-20" aria-describedby="password-rules">
+            <button type="button" class="toggle-password absolute inset-y-0 right-0 px-3 text-sm font-semibold text-teal-800" aria-controls="password" aria-pressed="false">Show</button>
+          </div>
+
+          <!-- Strength meter -->
+          <div class="mt-3" aria-hidden="true">
+            <div class="flex gap-1">
+              <span class="strength-bar h-1.5 flex-1 rounded bg-slate-200"></span>
+              <span class="strength-bar h-1.5 flex-1 rounded bg-slate-200"></span>
+              <span class="strength-bar h-1.5 flex-1 rounded bg-slate-200"></span>
+              <span class="strength-bar h-1.5 flex-1 rounded bg-slate-200"></span>
+            </div>
+          </div>
+          <p id="strength-label" class="mt-1 text-sm font-semibold text-slate-600" aria-live="polite">Password strength: too weak</p>
+
+          <ul id="password-rules" class="mt-2 grid gap-1 text-sm sm:grid-cols-2">
+            <li data-rule="length" class="text-slate-600"><span class="icon" aria-hidden="true">○</span> At least 8 characters</li>
+            <li data-rule="case" class="text-slate-600"><span class="icon" aria-hidden="true">○</span> Upper and lower case letters</li>
+            <li data-rule="number" class="text-slate-600"><span class="icon" aria-hidden="true">○</span> At least one number</li>
+            <li data-rule="special" class="text-slate-600"><span class="icon" aria-hidden="true">○</span> At least one symbol (e.g. ! @ #)</li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <label for="confirm_password" class="label">Confirm password</label>
+          <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required class="input">
+        </div>
+
+        <button type="submit" class="btn btn-primary w-full">Create account</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/pages/signup.js"></script>
+</body>
+</html>
