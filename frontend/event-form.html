@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event form · CivicEvents+</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body data-page="event-form" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+  <div id="site-header"></div>
+
+  <main id="main" class="mx-auto w-full max-w-6xl flex-1 px-4 py-8 lg:grid lg:grid-cols-[13rem_1fr] lg:gap-8" tabindex="-1">
+    <div id="admin-nav"></div>
+
+    <div class="max-w-3xl">
+      <nav aria-label="Breadcrumb" class="text-sm"><a href="events.html" class="font-semibold text-teal-800 underline">‹ All events</a></nav>
+      <h1 id="form-title" class="mt-2 text-3xl font-bold">New event</h1>
+      <p class="mt-1 text-slate-600">Fields marked <span aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
+
+      <form id="event-form" class="mt-6 space-y-5 rounded-xl border border-slate-200 bg-white p-6" novalidate>
+        <div class="form-alert hidden rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-900" role="alert"></div>
+
+        <div class="field">
+          <label for="title" class="label">Title <span aria-hidden="true">*</span></label>
+          <input id="title" name="title" type="text" required maxlength="200" class="input">
+        </div>
+
+        <div class="field">
+          <label for="description" class="label">Description</label>
+          <textarea id="description" name="description" rows="5" class="input" aria-describedby="description-hint"></textarea>
+          <p id="description-hint" class="mt-1 text-sm text-slate-600">What will happen, who it's for, and anything people should bring.</p>
+        </div>
+
+        <div class="field">
+          <label for="location" class="label">Location <span aria-hidden="true">*</span></label>
+          <input id="location" name="location" type="text" required class="input" placeholder="e.g. City Hall, Nairobi">
+        </div>
+
+        <div class="grid gap-5 sm:grid-cols-2">
+          <div class="field">
+            <label for="starts_at" class="label">Starts <span aria-hidden="true">*</span></label>
+            <input id="starts_at" name="starts_at" type="datetime-local" required class="input">
+          </div>
+          <div class="field">
+            <label for="ends_at" class="label">Ends <span aria-hidden="true">*</span></label>
+            <input id="ends_at" name="ends_at" type="datetime-local" required class="input">
+          </div>
+        </div>
+
+        <!-- Image upload: sent as multipart/form-data with the file key "image" -->
+        <div class="field">
+          <label for="image" class="label">Event image</label>
+          <p id="image-hint" class="mb-2 text-sm text-slate-600">JPG, PNG or GIF, up to 2 MB. Optional.</p>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
+            <div id="image-preview" class="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-sm text-slate-500 sm:w-56">No image chosen</div>
+            <div class="flex-1 space-y-2">
+              <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" aria-describedby="image-hint"
+                class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-teal-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-teal-800">
+              <button type="button" id="clear-image" class="hidden text-sm font-semibold text-red-700 underline">Remove chosen image</button>
+            </div>
+          </div>
+        </div>
+
+        <p class="rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+          <strong>Publishing:</strong> events are published as soon as they're saved. The backend has no draft or unpublish option for events.
+        </p>
+
+        <!-- Upload progress -->
+        <div id="upload-progress" class="hidden" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="flex justify-between text-sm"><span>Uploading…</span><span class="pct">0%</span></div>
+          <div class="mt-1 h-2 rounded bg-slate-200"><div class="bar h-2 rounded bg-teal-600" style="width:0%"></div></div>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <button type="submit" class="btn btn-primary">Create event</button>
+          <a href="events.html" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/layout.js"></script>
+  <script src="js/pages/event-form.js"></script>
+</body>
+</html>

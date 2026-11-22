@@ -137,5 +137,11 @@ $(function () {
   }
 
   EventCard.bindRegister($grid, render);
+  // Admin: remove the deleted event from the list without reloading
+  EventCard.bindDelete($grid, function (id) {
+    allEvents = allEvents.filter(function (e) { return e.id !== id; });
+    fillLocations();
+    render();
+  });
   load();
 });

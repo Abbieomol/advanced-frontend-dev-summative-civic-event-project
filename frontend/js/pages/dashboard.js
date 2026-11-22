@@ -77,6 +77,7 @@ $(function () {
 
   // After registering from a card, redraw the cards and refresh the numbers.
   EventCard.bindRegister($('#upcoming'), function () { loadUpcoming(); loadStats(); });
+  EventCard.bindDelete($('#upcoming'), function () { loadUpcoming(); });
   loadStats();
   loadUpcoming();
 });

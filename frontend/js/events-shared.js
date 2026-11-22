@@ -98,6 +98,9 @@ const EventCard = (function () {
     if (!isPast(event) && !Registrations.status(event.id)) {
       html += '<button type="button" class="register-btn btn btn-primary btn-sm" data-role="user" data-id="' + UI.escapeHtml(event.id) + '" aria-label="Register for ' + title + '">Register</button>';
     }
+    // ROLE GUARD (UI): Edit and Delete are admin-only (data-role="admin").
+    html += '<a href="event-form.html?id=' + encodeURIComponent(event.id) + '" class="btn btn-secondary btn-sm" data-role="admin" aria-label="Edit ' + title + '">Edit</a>';
+    html += '<button type="button" class="delete-event-btn btn btn-danger btn-sm" data-role="admin" data-id="' + UI.escapeHtml(event.id) + '" data-title="' + title + '" aria-label="Delete ' + title + '">Delete</button>';
     return '<div class="mt-auto flex flex-wrap gap-2 pt-4">' + html + '</div>';
   }
 
@@ -136,5 +139,34 @@ const EventCard = (function () {
     });
   }
 
-  return { render: render, placeholder: placeholder, isPast: isPast, bindRegister: bindRegister };
+  /**
+   * Admin delete with a confirmation dialog. Resolves after a successful delete.
+   * ROLE GUARD (UI): only admins ever see the buttons that call this; the
+   * backend also rejects DELETE /events/:id from non-admins with 403.
+   */
+  function confirmDelete(id, title, $btn) {
+    const done = $.Deferred();
+    UI.confirm({
+      title: 'Delete this event?',
+      message: '"' + title + '" will be removed for everyone, along with its registrations and feedback. This can\'t be undone.',
+      confirmLabel: 'Delete event',
+      cancelLabel: 'Keep it',
+      danger: true
+    }).then(function () {
+      if ($btn) UI.setLoading($btn, true, 'Deleting…');
+      Api.del('/events/' + encodeURIComponent(id))
+        .then(function () { UI.toast('"' + title + '" was deleted.', 'success'); done.resolve(); })
+        .fail(function () { if ($btn) UI.setLoading($btn, false); done.reject(); });
+    });
+    return done.promise();
+  }
+
+  function bindDelete($container, onDeleted) {
+    $container.on('click', '.delete-event-btn', function () {
+      const $btn = $(this);
+      confirmDelete($btn.data('id'), String($btn.data('title')), $btn).then(function () { onDeleted($btn.data('id')); });
+    });
+  }
+
+  return { render: render, placeholder: placeholder, isPast: isPast, bindRegister: bindRegister, bindDelete: bindDelete, confirmDelete: confirmDelete };
 })();
