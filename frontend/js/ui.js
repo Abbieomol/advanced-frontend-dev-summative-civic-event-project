@@ -221,7 +221,83 @@ const UI = (function () {
     $form.find('.form-alert').removeClass('hidden').text(message);
   }
 
+  // ---------- File uploads ----------
+  /**
+   * Checks a chosen file against CONFIG.UPLOADS[kind] ('image' | 'audio' | 'video').
+   * Returns an error message, or null if the file is OK.
+   */
+  function checkFile(file, kind) {
+    const rule = CONFIG.UPLOADS[kind];
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    if (rule.exts.indexOf(ext) === -1) {
+      return 'That file type isn\'t supported. Please choose ' + rule.label + '.';
+    }
+    if (file.size > rule.maxMB * 1024 * 1024) {
+      return 'That file is ' + (file.size / 1024 / 1024).toFixed(1) + ' MB. The maximum is ' + rule.maxMB + ' MB.';
+    }
+    return null;
+  }
+
+  // Upload progress bar: an element with role="progressbar" and a .bar child.
+  function setProgress($wrap, percent) {
+    $wrap.removeClass('hidden');
+    $wrap.attr('aria-valuenow', percent);
+    $wrap.find('.bar').css('width', percent + '%');
+    $wrap.find('.pct').text(percent + '%');
+  }
+
+  // ---------- Formatting ----------
+  // 75 -> "1:15"
+  function formatDuration(seconds) {
+    if (!isFinite(seconds) || seconds < 0) return '–:––';
+    seconds = Math.round(seconds);
+    const m = Math.floor(seconds / 60), s = seconds % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // Duration in words for screen readers: 75 -> "1 minute 15 seconds"
+  function durationWords(seconds) {
+    if (!isFinite(seconds)) return 'unknown length';
+    seconds = Math.round(seconds);
+    const m = Math.floor(seconds / 60), s = seconds % 60;
+    return (m ? m + ' minute' + (m === 1 ? '' : 's') + ' ' : '') + s + ' second' + (s === 1 ? '' : 's');
+  }
+
+  // "5 minutes ago", "2 days ago"
+  function timeAgo(iso) {
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return 'just now';
+    const units = [[86400 * 30, 'month'], [86400 * 7, 'week'], [86400, 'day'], [3600, 'hour'], [60, 'minute']];
+    for (let i = 0; i < units.length; i++) {
+      const n = Math.floor(diff / units[i][0]);
+      if (n >= 1) return n + ' ' + units[i][1] + (n === 1 ? '' : 's') + ' ago';
+    }
+    return 'just now';
+  }
+
+  // Badge shown to admins on unpublished items
+  function statusBadge(published) {
+    return published === false
+      ? '<span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">Unpublished</span>'
+      : '<span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">Published</span>';
+  }
+
+  // Star rating as text + hidden stars for screen readers
+  function stars(rating) {
+    rating = Math.round(Number(rating) || 0);
+    let html = '<span aria-hidden="true" class="text-amber-500">';
+    for (let i = 1; i <= 5; i++) html += i <= rating ? '★' : '<span class="text-slate-300">★</span>';
+    return html + '</span><span class="sr-only">' + rating + ' out of 5 stars</span>';
+  }
+
   return {
+    checkFile: checkFile,
+    setProgress: setProgress,
+    formatDuration: formatDuration,
+    durationWords: durationWords,
+    timeAgo: timeAgo,
+    statusBadge: statusBadge,
+    stars: stars,
     escapeHtml: escapeHtml,
     truncate: truncate,
     param: param,

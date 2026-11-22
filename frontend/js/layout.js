@@ -54,10 +54,21 @@ const Layout = (function () {
             '<input id="global-search-input" name="q" type="search" placeholder="Search events…" class="input w-56 py-1.5 text-sm">' +
           '</form>' +
 
-          '<a href="notifications.html" id="bell" class="relative ml-auto rounded-full p-2 text-slate-700 hover:bg-slate-100 md:ml-0" aria-label="Notifications">' +
-            '<svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>' +
-            '<span id="bell-count" class="absolute -right-0.5 -top-0.5 hidden min-w-[1.25rem] rounded-full bg-red-600 px-1 text-center text-xs font-bold text-white"></span>' +
-          '</a>' +
+          '<div class="relative ml-auto md:ml-0">' +
+            '<button type="button" id="bell" class="relative rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Notifications" aria-haspopup="true" aria-expanded="false" aria-controls="notif-panel">' +
+              '<svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>' +
+              '<span id="bell-count" class="absolute -right-0.5 -top-0.5 hidden min-w-[1.25rem] rounded-full bg-red-600 px-1 text-center text-xs font-bold text-white"></span>' +
+            '</button>' +
+            // Notification drawer: latest notifications, opened from the bell
+            '<div id="notif-panel" class="fixed inset-x-2 top-16 hidden max-h-[75vh] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96" role="region" aria-label="Recent notifications">' +
+              '<div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">' +
+                '<p class="font-semibold">Notifications</p>' +
+                '<button type="button" id="notif-mark-all" class="text-sm font-semibold text-teal-800 underline">Mark all as read</button>' +
+              '</div>' +
+              '<ul id="notif-list" class="max-h-[55vh] divide-y divide-slate-100 overflow-y-auto"></ul>' +
+              '<a href="notifications.html" class="block border-t border-slate-100 px-4 py-3 text-center text-sm font-semibold text-teal-800 hover:bg-slate-50">View all notifications</a>' +
+            '</div>' +
+          '</div>' +
 
           '<div class="relative">' +
             '<button type="button" id="profile-button" class="flex items-center gap-2 rounded-full p-1 hover:bg-slate-100" aria-haspopup="true" aria-expanded="false" aria-controls="profile-menu">' +
@@ -126,6 +137,7 @@ const Layout = (function () {
 
     $btn.on('click', function (e) {
       e.stopPropagation();
+      $('#notif-panel').addClass('hidden'); $('#bell').attr('aria-expanded', 'false');
       const open = $menu.hasClass('hidden');
       $menu.toggleClass('hidden', !open);
       $btn.attr('aria-expanded', String(open));
@@ -166,15 +178,103 @@ const Layout = (function () {
     isRead: function (id) { return this.ids().indexOf(id) !== -1; }
   };
 
+  let notifications = [];
+
+  // Where a notification should take the user, based on its metadata
+  function notificationLink(n) {
+    const m = n.metadata || {};
+    if (m.event_id) return { href: 'event.html?id=' + encodeURIComponent(m.event_id), label: 'View event' };
+    if (m.announcement_id) return { href: 'announcement.html?id=' + encodeURIComponent(m.announcement_id), label: 'Listen to announcement' };
+    if (m.promo_id) return { href: 'promo.html?id=' + encodeURIComponent(m.promo_id), label: 'Watch promo' };
+    return null;
+  }
+
+  function updateCount() {
+    const unread = notifications.filter(function (n) { return !ReadStore.isRead(n.id); }).length;
+    $('#bell-count').text(unread > 99 ? '99+' : unread).toggleClass('hidden', unread === 0);
+    $('#bell').attr('aria-label', 'Notifications, ' + unread + ' unread');
+    return unread;
+  }
+
+  function renderPanel() {
+    const $list = $('#notif-list');
+    if (!notifications.length) {
+      $list.html('<li class="px-4 py-6 text-center text-sm text-slate-600">You\'re all caught up. No notifications yet.</li>');
+      return;
+    }
+    $list.html(notifications.slice(0, 6).map(function (n) {
+      const unread = !ReadStore.isRead(n.id);
+      return '<li><a href="notifications.html?id=' + encodeURIComponent(n.id) + '" class="notif-item flex gap-3 px-4 py-3 hover:bg-slate-50" data-id="' + UI.escapeHtml(n.id) + '">' +
+        '<span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ' + (unread ? 'bg-teal-600' : 'bg-transparent') + '" aria-hidden="true"></span>' +
+        '<span class="min-w-0 flex-1">' +
+          '<span class="block text-sm ' + (unread ? 'font-semibold text-slate-900' : 'text-slate-700') + '">' + UI.escapeHtml(n.title) + (unread ? '<span class="sr-only"> (unread)</span>' : '') + '</span>' +
+          '<span class="block truncate text-sm text-slate-600">' + UI.escapeHtml(n.message) + '</span>' +
+          '<span class="block text-xs text-slate-500">' + UI.escapeHtml(UI.timeAgo(n.created_at)) + '</span>' +
+        '</span></a></li>';
+    }).join(''));
+  }
+
   function refreshBell() {
     return Api.get('/notifications', null, { silent: true }).then(function (res) {
-      const list = res.data || [];
-      const unread = list.filter(function (n) { return !ReadStore.isRead(n.id); }).length;
-      const $count = $('#bell-count');
-      $count.text(unread > 99 ? '99+' : unread).toggleClass('hidden', unread === 0);
-      $('#bell').attr('aria-label', 'Notifications, ' + unread + ' unread');
-      return list;
+      notifications = res.data || [];
+      updateCount();
+      renderPanel();
+      return notifications;
     });
+  }
+
+  function bindBell() {
+    const $bell = $('#bell'), $panel = $('#notif-panel');
+    function close() { $panel.addClass('hidden'); $bell.attr('aria-expanded', 'false'); }
+    $bell.on('click', function (e) {
+      e.stopPropagation();
+      $('#profile-menu').addClass('hidden'); $('#profile-button').attr('aria-expanded', 'false');
+      const open = $panel.hasClass('hidden');
+      $panel.toggleClass('hidden', !open);
+      $bell.attr('aria-expanded', String(open));
+      if (open) { refreshBell(); $panel.find('a, button').first().trigger('focus'); }
+    });
+    $(document).on('click', function (e) { if (!$(e.target).closest('#notif-panel').length) close(); });
+    $(document).on('keydown', function (e) {
+      if (e.key === 'Escape' && !$panel.hasClass('hidden')) { close(); $bell.trigger('focus'); }
+    });
+    // Opening one marks it as read straight away (optimistic: stored locally)
+    $panel.on('click', '.notif-item', function () { ReadStore.markRead($(this).data('id')); });
+    $('#notif-mark-all').on('click', function () {
+      notifications.forEach(function (n) { ReadStore.markRead(n.id); });
+      updateCount(); renderPanel();
+      UI.toast('All notifications marked as read.', 'success');
+    });
+  }
+
+  // ---------- Admin sidebar ----------
+  // Admin pages include <div id="admin-nav"></div>; this fills it.
+  const ADMIN_LINKS = [
+    { page: 'admin-dashboard', href: 'admin-dashboard.html', label: 'Overview' },
+    { page: 'admin-users', href: 'admin-users.html', label: 'Users' },
+    { page: 'event-form', href: 'event-form.html', label: '+ New event' },
+    { page: 'announcement-form', href: 'announcement-form.html', label: '+ New announcement' },
+    { page: 'promo-form', href: 'promo-form.html', label: '+ New promo' },
+    { page: 'notifications', href: 'notifications.html', label: 'Manage notifications' }
+  ];
+
+  function renderAdminNav() {
+    const $slot = $('#admin-nav');
+    if (!$slot.length) return;
+    const page = $('body').data('page');
+    $slot.replaceWith(
+      // ROLE GUARD (UI): the whole sidebar is admin-only.
+      '<nav aria-label="Admin" data-role="admin" class="mb-6 lg:mb-0">' +
+        '<p class="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-slate-500 lg:block">Admin</p>' +
+        '<ul class="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1 lg:pb-0">' +
+        ADMIN_LINKS.map(function (l) {
+          const cur = l.page === page;
+          return '<li class="shrink-0"><a href="' + l.href + '"' + (cur ? ' aria-current="page"' : '') +
+            ' class="block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ' +
+            (cur ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 lg:bg-transparent lg:ring-0') + '">' + l.label + '</a></li>';
+        }).join('') +
+        '</ul></nav>'
+    );
   }
 
   /**
@@ -184,11 +284,13 @@ const Layout = (function () {
     const page = $('body').data('page');
     $('#site-header').replaceWith(headerHtml(page));
     $('#site-footer').replaceWith(footerHtml());
+    renderAdminNav();
     Auth.applyRoleVisibility(document);
     bindMenus();
+    bindBell();
     refreshBell();
     UI.showFlash();
   }
 
-  return { init: init, refreshBell: refreshBell, ReadStore: ReadStore };
+  return { init: init, refreshBell: refreshBell, updateCount: updateCount, notificationLink: notificationLink, ReadStore: ReadStore };
 })();
