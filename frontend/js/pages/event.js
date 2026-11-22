@@ -28,6 +28,8 @@ $(function () {
         }
         document.title = event.title + ' · ' + CONFIG.APP_NAME;
         render();
+        loadAttendees();
+        Feedback.init($('#feedback'), event);
       })
       .fail(function (err) {
         if (err.status === 404) {
@@ -85,6 +87,11 @@ $(function () {
       '<div class="mt-6 grid gap-8 lg:grid-cols-3">' +
         '<article class="lg:col-span-2">' +
           (event.published === false ? '<p class="mb-2 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">Unpublished</p>' : '') +
+          // ROLE GUARD (UI): admin toolbar, removed for normal users by applyRoleVisibility
+          '<div class="mb-3 flex flex-wrap gap-2" data-role="admin" hidden>' +
+            '<a href="event-form.html?id=' + encodeURIComponent(event.id) + '" class="btn btn-secondary btn-sm">Edit event</a>' +
+            '<button type="button" id="delete-event" class="btn btn-danger btn-sm">Delete event</button>' +
+          '</div>' +
           '<h1 class="text-3xl font-bold leading-tight">' + UI.escapeHtml(event.title) + '</h1>' +
           '<dl class="mt-4 grid gap-3 sm:grid-cols-2">' +
             '<div class="rounded-lg bg-white p-3 ring-1 ring-slate-200"><dt class="text-xs font-semibold uppercase text-slate-500">When</dt>' +
@@ -98,7 +105,39 @@ $(function () {
         '<div>' + registrationPanel() + '</div>' +
       '</div>'
     );
+    Auth.applyRoleVisibility($detail);
   }
+
+  // ----- Admin: list of people registered (GET /event-registrations/event/:id/attendees) -----
+  function loadAttendees() {
+    if (!Auth.isAdmin()) return;
+    const $body = $('#attendees-body').html(UI.skeletonRows(2));
+    Api.get('/event-registrations/event/' + encodeURIComponent(event.id) + '/attendees', null, { silent: true })
+      .then(function (res) {
+        const people = res.data || [];
+        if (!people.length) { $body.html('<p class="text-slate-600">No one has registered yet.</p>'); return; }
+        $body.html(
+          '<p class="text-sm text-slate-600">' + people.length + ' registered</p>' +
+          '<div class="mt-2 overflow-x-auto rounded-xl border border-slate-200 bg-white">' +
+            '<table class="w-full text-left text-sm"><caption class="sr-only">People registered for ' + UI.escapeHtml(event.title) + '</caption>' +
+            '<thead class="bg-slate-50 text-slate-600"><tr><th scope="col" class="px-4 py-2">Name</th><th scope="col" class="px-4 py-2">Email</th><th scope="col" class="px-4 py-2">Registered</th></tr></thead><tbody>' +
+            people.map(function (p) {
+              return '<tr class="border-t border-slate-100"><td class="px-4 py-2 font-medium">' + UI.escapeHtml(p.full_name) + '</td>' +
+                '<td class="px-4 py-2"><a class="underline" href="mailto:' + UI.escapeHtml(p.email) + '">' + UI.escapeHtml(p.email) + '</a></td>' +
+                '<td class="px-4 py-2">' + UI.escapeHtml(UI.formatDate(p.created_at)) + '</td></tr>';
+            }).join('') +
+            '</tbody></table></div>'
+        );
+      })
+      .fail(function (err) { UI.errorState($body, err.message, loadAttendees); });
+  }
+
+  $detail.on('click', '#delete-event', function () {
+    EventCard.confirmDelete(event.id, event.title, $(this)).then(function () {
+      UI.flash('"' + event.title + '" was deleted.', 'success');
+      window.location.replace('events.html');
+    });
+  });
 
   // ----- Register / cancel -----
   $detail.on('click', '#register-btn', function () {
