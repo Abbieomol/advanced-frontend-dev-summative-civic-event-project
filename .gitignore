@@ -1,7 +1,7 @@
 ﻿# uploads created while testing
 backend/uploads/
 
-# demo media (only the README with the video link is committed)
+# demo media (only the ./video-demo/README is committed)
 video-demo/*
 !video-demo/README.md
 
