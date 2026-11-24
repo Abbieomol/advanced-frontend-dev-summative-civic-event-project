@@ -129,15 +129,24 @@ const EventCard = (function () {
     const done = $.Deferred();
     UI.confirm({
       title: 'Delete this event?',
-      message: '"' + title + '" will be removed for everyone, along with its registrations and feedback. This can\'t be undone.',
+      message: '"' + title + '" will be removed for everyone. This can\'t be undone.',
       confirmLabel: 'Delete event',
       cancelLabel: 'Keep it',
       danger: true
     }).then(function () {
       if ($btn) UI.setLoading($btn, true, 'Deleting…');
-      Api.del('/events/' + encodeURIComponent(id))
+      Api.del('/events/' + encodeURIComponent(id), { silent: true })
         .then(function () { UI.toast('"' + title + '" was deleted.', 'success'); done.resolve(); })
-        .fail(function () { if ($btn) UI.setLoading($btn, false); done.reject(); });
+        .fail(function (err) {
+          if ($btn) UI.setLoading($btn, false);
+          // the database won't delete an event that has registrations (even cancelled ones)
+          if (/foreign key|event_registrations/i.test(err.message)) {
+            UI.toast('"' + title + '" can\'t be deleted because people have registered for it. You can edit it instead.', 'error');
+          } else if (err.status !== 401) {
+            UI.toast(err.message, 'error');
+          }
+          done.reject();
+        });
     });
     return done.promise();
   }
