@@ -7,7 +7,7 @@ and the user accounts.
 
 **Tech:** HTML, Tailwind CSS (CDN) and jQuery only. No build step.
 
-**Repository layout:** `frontend/` holds the whole frontend application; `backend/` holds the provided Node.js/Express + PostgreSQL API (base URL `http://localhost:4000/api`); `video-demo/README.md` holds the demo video link.
+**Repository layout:** `frontend/` holds the whole frontend application; `backend/` holds the provided Node.js/Express + PostgreSQL API (base URL `http://localhost:4000/api`); `video-demo/Video Project 2.mp4` holds the demo video link, or alternatively, https://drive.google.com/file/d/1aPVfgQJo-S2FNBjiZ1cqD1NsrgO1ahZb/view?usp=drive_link 
 
 ---
 
