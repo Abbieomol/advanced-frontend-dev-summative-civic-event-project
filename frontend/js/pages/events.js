@@ -48,8 +48,8 @@ $(function () {
     const from = $('#filter-from').val() ? new Date($('#filter-from').val() + 'T00:00:00') : null;
     const to = $('#filter-to').val() ? new Date($('#filter-to').val() + 'T23:59:59') : null;
     const includePast = $('#filter-past').is(':checked');
-    // ROLE GUARD: only admins can see unpublished events
-    const includeUnpublished = Auth.isAdmin() && $('#filter-unpublished').is(':checked');
+    // ROLE GUARD: normal users only see published events, admins see everything
+    const includeUnpublished = Auth.isAdmin();
 
     return allEvents.filter(function (e) {
       if (e.published === false && !includeUnpublished) return false;
