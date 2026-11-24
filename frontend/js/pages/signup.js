@@ -18,7 +18,7 @@ $(function () {
     { label: 'too weak', color: 'bg-red-600', text: 'text-red-700' },
     { label: 'weak', color: 'bg-red-600', text: 'text-red-700' },
     { label: 'fair', color: 'bg-amber-500', text: 'text-amber-700' },
-    { label: 'good', color: 'bg-teal-500', text: 'text-teal-700' },
+    { label: 'good', color: 'bg-brand-500', text: 'text-brand-700' },
     { label: 'strong', color: 'bg-emerald-600', text: 'text-emerald-700' }
   ];
 
@@ -40,11 +40,11 @@ $(function () {
     const score = password ? checkPassword(password) : (checkPassword(''), 0);
     const level = LEVELS[score];
     $('.strength-bar').each(function (i) {
-      $(this).removeClass('bg-slate-200 bg-red-600 bg-amber-500 bg-teal-500 bg-emerald-600')
+      $(this).removeClass('bg-slate-200 bg-red-600 bg-amber-500 bg-brand-500 bg-emerald-600')
         .addClass(i < score ? level.color : 'bg-slate-200');
     });
     $('#strength-label')
-      .removeClass('text-slate-600 text-red-700 text-amber-700 text-teal-700 text-emerald-700')
+      .removeClass('text-slate-600 text-red-700 text-amber-700 text-brand-700 text-emerald-700')
       .addClass(password ? level.text : 'text-slate-600')
       .text('Password strength: ' + level.label);
     return score;

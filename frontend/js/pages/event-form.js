@@ -25,7 +25,7 @@ $(function () {
 
   function showPreview(url, alt) {
     $('#image-preview').html(url
-      ? '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml(alt) + '" class="h-full w-full object-cover">'
+      ? '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml(alt) + '" class="h-full w-full object-contain">'
       : 'No image chosen');
   }
 

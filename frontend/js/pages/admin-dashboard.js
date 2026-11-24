@@ -57,7 +57,7 @@ $(function () {
   }
 
   // ---------- Bar charts ----------
-  // Single series, one hue (teal), so no legend is needed: the title names it.
+  // Single series, one hue (Nairobi green), so no legend is needed: the title names it.
   // Bars have 4px rounded ends at the data end, a recessive grid, and a
   // tooltip on hover AND keyboard focus.
   // Round the axis top up to 2, 4, 6, 8 or 10 × a power of ten, so the
@@ -77,7 +77,7 @@ $(function () {
       return '<li class="grid grid-cols-[7.5rem_1fr_3rem] items-center gap-3 text-sm">' +
         '<span class="text-slate-700">' + r.label + '</span>' +
         '<span class="relative h-6 rounded-sm bg-slate-50">' +
-          '<span class="bar-hit absolute inset-y-0 left-0 block cursor-default rounded-r bg-teal-600 transition-[width] duration-500" style="width:' + Math.max(pct, r.value ? 1 : 0) + '%" ' +
+          '<span class="bar-hit absolute inset-y-0 left-0 block cursor-default rounded-r bg-brand-600 transition-[width] duration-500" style="width:' + Math.max(pct, r.value ? 1 : 0) + '%" ' +
             'tabindex="0" data-tip="' + r.label + ': ' + r.value.toLocaleString() + '" aria-label="' + r.label + ': ' + r.value + '"></span>' +
         '</span>' +
         '<span class="text-right font-semibold tabular-nums text-slate-900">' + r.value.toLocaleString() + '</span>' +
@@ -100,7 +100,7 @@ $(function () {
             const pct = (r.value / max) * 100;
             return '<span class="bar-hit flex h-full w-full max-w-[3rem] cursor-default items-end" tabindex="0" data-tip="' + r.label + ': ' + r.value + ' new user' + (r.value === 1 ? '' : 's') + '" ' +
               'aria-label="' + r.label + ': ' + r.value + ' new users">' +
-              '<span class="block w-full rounded-t bg-teal-600 transition-[height] duration-500" style="height:' + pct + '%"></span></span>';
+              '<span class="block w-full rounded-t bg-brand-600 transition-[height] duration-500" style="height:' + pct + '%"></span></span>';
           }).join('') +
         '</div>' +
       '</div>' +

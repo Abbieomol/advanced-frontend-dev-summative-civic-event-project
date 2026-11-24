@@ -24,8 +24,8 @@ const Layout = (function () {
     return NAV_LINKS.map(function (link) {
       const current = link.page === currentPage;
       const cls = mobile
-        ? 'block rounded-md px-3 py-2 text-base font-medium ' + (current ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-100')
-        : 'rounded-md px-3 py-2 text-sm font-medium ' + (current ? 'bg-teal-50 text-teal-800' : 'text-slate-700 hover:bg-slate-100');
+        ? 'block rounded-md px-3 py-2 text-base font-medium ' + (current ? 'bg-brand-50 text-brand-800' : 'text-slate-700 hover:bg-slate-100')
+        : 'rounded-md px-3 py-2 text-sm font-medium ' + (current ? 'bg-brand-50 text-brand-800' : 'text-slate-700 hover:bg-slate-100');
       // ROLE GUARD (UI): admin-only links carry data-role="admin" and are
       // removed for normal users by Auth.applyRoleVisibility().
       return '<a href="' + link.href + '" class="' + cls + '"' +
@@ -42,8 +42,8 @@ const Layout = (function () {
       '<a href="#main" class="skip-link">Skip to main content</a>' +
       '<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">' +
         '<div class="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3">' +
-          '<a href="dashboard.html" class="flex items-center gap-2 font-bold text-teal-800">' +
-            '<span class="flex h-9 w-9 items-center justify-center rounded-lg bg-teal-700 text-white" aria-hidden="true">CE</span>' +
+          '<a href="dashboard.html" class="flex items-center gap-2 font-bold text-brand-800">' +
+            '<span class="flex h-9 w-9 items-center justify-center rounded-lg bg-ink font-bold text-sun-400" aria-hidden="true">CE</span>' +
             '<span class="hidden sm:inline">' + CONFIG.APP_NAME + '</span>' +
           '</a>' +
 
@@ -57,22 +57,22 @@ const Layout = (function () {
           '<div class="relative ml-auto md:ml-0">' +
             '<button type="button" id="bell" class="relative rounded-full p-2 text-slate-700 hover:bg-slate-100" aria-label="Notifications" aria-haspopup="true" aria-expanded="false" aria-controls="notif-panel">' +
               '<svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>' +
-              '<span id="bell-count" class="absolute -right-0.5 -top-0.5 hidden min-w-[1.25rem] rounded-full bg-red-600 px-1 text-center text-xs font-bold text-white"></span>' +
+              '<span id="bell-count" class="absolute -right-0.5 -top-0.5 hidden min-w-[1.25rem] rounded-full bg-sun-400 px-1 text-center text-xs font-bold text-ink ring-2 ring-white"></span>' +
             '</button>' +
             // Notification drawer: latest notifications, opened from the bell
             '<div id="notif-panel" class="fixed inset-x-2 top-16 hidden max-h-[75vh] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96" role="region" aria-label="Recent notifications">' +
               '<div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">' +
                 '<p class="font-semibold">Notifications</p>' +
-                '<button type="button" id="notif-mark-all" class="text-sm font-semibold text-teal-800 underline">Mark all as read</button>' +
+                '<button type="button" id="notif-mark-all" class="text-sm font-semibold text-brand-800 underline">Mark all as read</button>' +
               '</div>' +
               '<ul id="notif-list" class="max-h-[55vh] divide-y divide-slate-100 overflow-y-auto"></ul>' +
-              '<a href="notifications.html" class="block border-t border-slate-100 px-4 py-3 text-center text-sm font-semibold text-teal-800 hover:bg-slate-50">View all notifications</a>' +
+              '<a href="notifications.html" class="block border-t border-slate-100 px-4 py-3 text-center text-sm font-semibold text-brand-800 hover:bg-slate-50">View all notifications</a>' +
             '</div>' +
           '</div>' +
 
           '<div class="relative">' +
             '<button type="button" id="profile-button" class="flex items-center gap-2 rounded-full p-1 hover:bg-slate-100" aria-haspopup="true" aria-expanded="false" aria-controls="profile-menu">' +
-              '<span class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-white" aria-hidden="true">' + UI.escapeHtml(initials) + '</span>' +
+              '<span class="flex h-8 w-8 items-center justify-center rounded-full bg-brand-700 text-sm font-semibold text-white" aria-hidden="true">' + UI.escapeHtml(initials) + '</span>' +
               '<span class="sr-only">Open profile menu for ' + UI.escapeHtml(user.full_name) + '</span>' +
             '</button>' +
             '<div id="profile-menu" class="absolute right-0 mt-2 hidden w-60 rounded-xl border border-slate-200 bg-white py-2 shadow-lg">' +
@@ -100,20 +100,22 @@ const Layout = (function () {
           '</form>' +
           navLinksHtml(currentPage, true) +
         '</nav>' +
+        '<div class="nairobi-stripe" aria-hidden="true"></div>' +
       '</header>';
   }
 
   function footerHtml() {
     const year = new Date().getFullYear();
     return '' +
-      '<footer class="mt-16 border-t border-slate-200 bg-slate-900 text-slate-300">' +
+      '<footer class="mt-16 bg-ink text-neutral-300">' +
+        '<div class="nairobi-stripe" aria-hidden="true"></div>' +
         '<div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">' +
           '<div>' +
-            '<p class="font-bold text-white">' + CONFIG.APP_NAME + '</p>' +
+            '<p class="font-bold text-sun-400">' + CONFIG.APP_NAME + '</p>' +
             '<p class="mt-2 text-sm">Your city\'s events, announcements and services in one accessible place.</p>' +
           '</div>' +
           '<div>' +
-            '<p class="font-semibold text-white">Help &amp; contact</p>' +
+            '<p class="font-semibold text-sun-400">Help &amp; contact</p>' +
             '<ul class="mt-2 space-y-1 text-sm">' +
               '<li><a class="underline hover:text-white" href="mailto:' + CONFIG.SUPPORT_EMAIL + '">' + CONFIG.SUPPORT_EMAIL + '</a></li>' +
               '<li>City Hall Help Desk: Mon–Fri, 8am–5pm</li>' +
@@ -121,11 +123,11 @@ const Layout = (function () {
             '</ul>' +
           '</div>' +
           '<div>' +
-            '<p class="font-semibold text-white">Accessibility</p>' +
+            '<p class="font-semibold text-sun-400">Accessibility</p>' +
             '<p class="mt-2 text-sm">This site supports keyboard navigation, screen readers, captions and transcripts. If something doesn\'t work for you, email us and we\'ll help.</p>' +
           '</div>' +
         '</div>' +
-        '<p class="border-t border-slate-800 py-4 text-center text-xs">&copy; ' + year + ' ' + CONFIG.APP_NAME + '. All rights reserved.</p>' +
+        '<p class="border-t border-neutral-800 py-4 text-center text-xs">&copy; ' + year + ' ' + CONFIG.APP_NAME + '. All rights reserved.</p>' +
       '</footer>';
   }
 
@@ -205,7 +207,7 @@ const Layout = (function () {
     $list.html(notifications.slice(0, 6).map(function (n) {
       const unread = !ReadStore.isRead(n.id);
       return '<li><a href="notifications.html?id=' + encodeURIComponent(n.id) + '" class="notif-item flex gap-3 px-4 py-3 hover:bg-slate-50" data-id="' + UI.escapeHtml(n.id) + '">' +
-        '<span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ' + (unread ? 'bg-teal-600' : 'bg-transparent') + '" aria-hidden="true"></span>' +
+        '<span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ' + (unread ? 'bg-brand-600' : 'bg-transparent') + '" aria-hidden="true"></span>' +
         '<span class="min-w-0 flex-1">' +
           '<span class="block text-sm ' + (unread ? 'font-semibold text-slate-900' : 'text-slate-700') + '">' + UI.escapeHtml(n.title) + (unread ? '<span class="sr-only"> (unread)</span>' : '') + '</span>' +
           '<span class="block truncate text-sm text-slate-600">' + UI.escapeHtml(n.message) + '</span>' +
@@ -271,7 +273,7 @@ const Layout = (function () {
           const cur = l.page === page;
           return '<li class="shrink-0"><a href="' + l.href + '"' + (cur ? ' aria-current="page"' : '') +
             ' class="block whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ' +
-            (cur ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 lg:bg-transparent lg:ring-0') + '">' + l.label + '</a></li>';
+            (cur ? 'bg-brand-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-100 lg:bg-transparent lg:ring-0') + '">' + l.label + '</a></li>';
         }).join('') +
         '</ul></nav>'
     );

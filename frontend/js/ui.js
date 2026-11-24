@@ -62,9 +62,9 @@ const UI = (function () {
     type = type || 'info';
     options = options || {};
     const styles = {
-      success: 'bg-emerald-50 border-emerald-600 text-emerald-900',
+      success: 'bg-brand-50 border-brand-700 text-brand-900',
       error: 'bg-red-50 border-red-600 text-red-900',
-      info: 'bg-slate-50 border-slate-600 text-slate-900'
+      info: 'bg-sun-100 border-ink text-ink'
     };
     const icons = { success: '✓', error: '!', info: 'i' };
 
@@ -278,8 +278,8 @@ const UI = (function () {
   // Badge shown to admins on unpublished items
   function statusBadge(published) {
     return published === false
-      ? '<span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">Unpublished</span>'
-      : '<span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">Published</span>';
+      ? '<span class="rounded bg-sun-200 px-2 py-0.5 text-xs font-semibold text-ink">Unpublished</span>'
+      : '<span class="rounded bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-900">Published</span>';
   }
 
   // Star rating as text + hidden stars for screen readers

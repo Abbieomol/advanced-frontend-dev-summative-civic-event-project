@@ -31,7 +31,7 @@ $(function () {
   function cardHtml(a) {
     const playing = playingId === a.id;
     return '<article class="flex gap-4 rounded-xl border border-slate-200 bg-white p-4" data-id="' + UI.escapeHtml(a.id) + '">' +
-      '<button type="button" class="play-btn flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-700 text-white hover:bg-teal-800" ' +
+      '<button type="button" class="play-btn flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-700 text-white hover:bg-brand-800" ' +
         'aria-pressed="' + playing + '" aria-label="' + (playing ? 'Pause ' : 'Play ') + UI.escapeHtml(a.title) + '">' +
         '<span aria-hidden="true" class="text-lg">' + (playing ? '❚❚' : '▶') + '</span></button>' +
       '<div class="min-w-0 flex-1">' +

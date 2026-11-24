@@ -35,7 +35,7 @@ $(function () {
     $summary.html(
       '<h2 id="summary-heading" class="sr-only">Account summary</h2>' +
       '<div class="flex flex-col gap-4 sm:flex-row sm:items-center">' +
-        '<span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-teal-700 text-xl font-bold text-white" aria-hidden="true">' + UI.escapeHtml(initials) + '</span>' +
+        '<span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xl font-bold text-white" aria-hidden="true">' + UI.escapeHtml(initials) + '</span>' +
         '<div class="flex-1">' +
           '<p class="text-xl font-semibold">' + UI.escapeHtml(profile.full_name) + '</p>' +
           '<p class="text-slate-700">' + UI.escapeHtml(profile.email) + '</p>' +

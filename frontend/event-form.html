@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Event form · CivicEvents+</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
 <body data-page="event-form" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -14,7 +15,7 @@
     <div id="admin-nav"></div>
 
     <div class="max-w-3xl">
-      <nav aria-label="Breadcrumb" class="text-sm"><a href="events.html" class="font-semibold text-teal-800 underline">‹ All events</a></nav>
+      <nav aria-label="Breadcrumb" class="text-sm"><a href="events.html" class="font-semibold text-brand-800 underline">‹ All events</a></nav>
       <h1 id="form-title" class="mt-2 text-3xl font-bold">New event</h1>
       <p class="mt-1 text-slate-600">Fields marked <span aria-hidden="true">*</span><span class="sr-only">with an asterisk</span> are required.</p>
 
@@ -56,7 +57,7 @@
             <div id="image-preview" class="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-sm text-slate-500 sm:w-56">No image chosen</div>
             <div class="flex-1 space-y-2">
               <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.gif,image/jpeg,image/png,image/gif" aria-describedby="image-hint"
-                class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-teal-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-teal-800">
+                class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-brand-800">
               <button type="button" id="clear-image" class="hidden text-sm font-semibold text-red-700 underline">Remove chosen image</button>
             </div>
           </div>
@@ -69,7 +70,7 @@
         <!-- Upload progress -->
         <div id="upload-progress" class="hidden" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="flex justify-between text-sm"><span>Uploading…</span><span class="pct">0%</span></div>
-          <div class="mt-1 h-2 rounded bg-slate-200"><div class="bar h-2 rounded bg-teal-600" style="width:0%"></div></div>
+          <div class="mt-1 h-2 rounded bg-slate-200"><div class="bar h-2 rounded bg-brand-600" style="width:0%"></div></div>
         </div>
 
         <div class="flex flex-wrap gap-3">

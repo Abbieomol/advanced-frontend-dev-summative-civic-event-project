@@ -57,17 +57,17 @@ $(function () {
       '<section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5" aria-label="Audio player">' +
         '<div class="flex flex-wrap items-center gap-3">' +
           '<button type="button" id="back-10" class="btn btn-secondary btn-sm" aria-label="Back 10 seconds">« 10s</button>' +
-          '<button type="button" id="play" class="flex h-14 w-14 items-center justify-center rounded-full bg-teal-700 text-xl text-white hover:bg-teal-800" aria-label="Play">' +
+          '<button type="button" id="play" class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-700 text-xl text-white hover:bg-brand-800" aria-label="Play">' +
             '<span aria-hidden="true">▶</span></button>' +
           '<button type="button" id="fwd-10" class="btn btn-secondary btn-sm" aria-label="Forward 10 seconds">10s »</button>' +
           '<p class="ml-auto font-mono text-lg tabular-nums" aria-label="Playback position"><span id="cur">0:00</span> / <span id="dur">–:––</span></p>' +
         '</div>' +
         '<div class="mt-4"><label for="seek" class="sr-only">Seek</label>' +
-          '<input id="seek" type="range" min="0" max="100" step="0.1" value="0" class="w-full accent-teal-700" aria-valuetext="0:00"></div>' +
+          '<input id="seek" type="range" min="0" max="100" step="0.1" value="0" class="w-full accent-brand-700" aria-valuetext="0:00"></div>' +
         '<div class="mt-3 flex flex-wrap items-center gap-4 text-sm">' +
           '<label class="flex items-center gap-2">Speed <select id="speed" class="input w-auto py-1 text-sm">' +
             '<option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>' +
-          '<label class="flex items-center gap-2">Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="1" class="accent-teal-700"></label>' +
+          '<label class="flex items-center gap-2">Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="1" class="accent-brand-700"></label>' +
         '</div>' +
         // The browser's own player is kept too (fully keyboard accessible).
         '<audio id="audio" controls preload="metadata" class="mt-4 w-full">' +

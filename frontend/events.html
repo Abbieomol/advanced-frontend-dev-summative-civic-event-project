@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Events · CivicEvents+</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
 <body data-page="events" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -39,10 +40,10 @@
         <input id="filter-to" type="date" class="input">
       </div>
       <div class="flex flex-wrap items-center gap-x-6 gap-y-2 sm:col-span-2 lg:col-span-5">
-        <label class="flex items-center gap-2 text-sm"><input id="filter-past" type="checkbox" class="h-4 w-4 accent-teal-700"> Include past events</label>
+        <label class="flex items-center gap-2 text-sm"><input id="filter-past" type="checkbox" class="h-4 w-4 accent-brand-700"> Include past events</label>
         <!-- ROLE GUARD (UI): unpublished events are only listed for admins -->
-        <label class="flex items-center gap-2 text-sm" data-role="admin" hidden><input id="filter-unpublished" type="checkbox" class="h-4 w-4 accent-teal-700"> Include unpublished</label>
-        <button type="reset" class="ml-auto text-sm font-semibold text-teal-800 underline">Clear filters</button>
+        <label class="flex items-center gap-2 text-sm" data-role="admin" hidden><input id="filter-unpublished" type="checkbox" class="h-4 w-4 accent-brand-700"> Include unpublished</label>
+        <button type="reset" class="ml-auto text-sm font-semibold text-brand-800 underline">Clear filters</button>
       </div>
     </form>
 

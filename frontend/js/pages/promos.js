@@ -37,9 +37,9 @@ $(function () {
       '<a href="promo.html?id=' + encodeURIComponent(p.id) + '" class="group relative block bg-slate-900" aria-label="Play ' + title + '">' +
         // Thumbnail: a muted, silent <video> showing the first frame. Its src
         // is only set when the card becomes visible (lazy loading).
-        '<video class="thumb h-44 w-full object-cover opacity-90" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-src="' + UI.escapeHtml(Api.fileUrl(p.video_url)) + '#t=0.5"></video>' +
+        '<video class="thumb h-44 w-full object-cover opacity-95" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-src="' + UI.escapeHtml(Api.fileUrl(p.video_url)) + '#t=0.5"></video>' +
         '<span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">' +
-          '<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-xl text-teal-800 shadow transition group-hover:scale-110">▶</span></span>' +
+          '<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-xl text-brand-800 shadow transition group-hover:scale-110">▶</span></span>' +
         '<span class="absolute bottom-2 left-2 rounded bg-black/70 px-2 py-0.5 text-xs font-semibold text-white" aria-hidden="true">CC</span>' +
       '</a>' +
       '<div class="flex flex-1 flex-col gap-2 p-4">' +

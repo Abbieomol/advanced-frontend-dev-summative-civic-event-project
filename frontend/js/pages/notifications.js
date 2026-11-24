@@ -22,9 +22,9 @@ $(function () {
   let selectedId = UI.param('id');
 
   const TYPE_STYLE = {
-    event: { label: 'Event', cls: 'bg-teal-100 text-teal-900' },
-    announcement: { label: 'Announcement', cls: 'bg-indigo-100 text-indigo-900' },
-    promo: { label: 'Promo', cls: 'bg-pink-100 text-pink-900' }
+    event: { label: 'Event', cls: 'bg-brand-100 text-brand-900' },
+    announcement: { label: 'Announcement', cls: 'bg-sun-200 text-ink' },
+    promo: { label: 'Promo', cls: 'bg-ink text-white' }
   };
   function typeBadge(type) {
     const t = TYPE_STYLE[type] || { label: type || 'General', cls: 'bg-slate-100 text-slate-800' };
@@ -50,7 +50,7 @@ $(function () {
     $('[role=tab]').each(function () {
       const on = $(this).data('filter') === filter;
       $(this).attr('aria-selected', String(on)).attr('tabindex', on ? '0' : '-1')
-        .toggleClass('border-teal-700 text-teal-800', on).toggleClass('border-transparent text-slate-600', !on);
+        .toggleClass('border-brand-700 text-brand-800', on).toggleClass('border-transparent text-slate-600', !on);
     });
     $items.attr('aria-labelledby', 'tab-' + filter);
     Layout.updateCount();   // keep the bell count in step
@@ -68,9 +68,9 @@ $(function () {
       const selected = n.id === selectedId;
       return '<li class="flex items-stretch gap-2">' +
         '<button type="button" class="open-btn flex min-w-0 flex-1 gap-3 rounded-xl border p-4 text-left ' +
-          (selected ? 'border-teal-600 bg-teal-50' : 'border-slate-200 bg-white hover:bg-slate-50') + '" data-id="' + UI.escapeHtml(n.id) + '"' +
+          (selected ? 'border-brand-600 bg-brand-50' : 'border-slate-200 bg-white hover:bg-slate-50') + '" data-id="' + UI.escapeHtml(n.id) + '"' +
           (selected ? ' aria-current="true"' : '') + '>' +
-          '<span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ' + (isUnread ? 'bg-teal-600' : 'bg-transparent') + '" aria-hidden="true"></span>' +
+          '<span class="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ' + (isUnread ? 'bg-brand-600' : 'bg-transparent') + '" aria-hidden="true"></span>' +
           '<span class="min-w-0 flex-1">' +
             '<span class="flex flex-wrap items-center gap-2">' + typeBadge(n.type) +
               '<span class="text-xs text-slate-500">' + UI.escapeHtml(UI.timeAgo(n.created_at)) + '</span></span>' +

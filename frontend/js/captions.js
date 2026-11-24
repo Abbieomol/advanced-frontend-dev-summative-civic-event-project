@@ -2,8 +2,8 @@
  * captions.js
  * The backend stores a promo's captions as plain text (caption_text), not as
  * a caption file. A <track> element needs a WebVTT file, so we build one in
- * the browser: the text is split into sentences, spread evenly over the
- * video's length, and turned into a Blob URL that the <track> can load.
+ * the browser: the text is split into sentences, spread over the video's
+ * length in proportion to each sentence's length, and turned into a Blob URL that the <track> can load.
  */
 const Captions = (function () {
 
@@ -15,7 +15,8 @@ const Captions = (function () {
 
   // Split into short cues: sentences, then long sentences into ~12-word chunks.
   function cues(text) {
-    const sentences = String(text).replace(/\s+/g, ' ').trim().match(/[^.!?]+[.!?]*/g) || [];
+    // Split only where . ! or ? is followed by a space, so "p.m." or "e.g." stay whole.
+    const sentences = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s+/).filter(Boolean);
     const out = [];
     sentences.forEach(function (s) {
       const words = s.trim().split(' ');
@@ -31,10 +32,15 @@ const Captions = (function () {
   function toVttUrl(text, duration) {
     const parts = cues(text);
     if (!parts.length) return null;
-    const each = isFinite(duration) && duration > 0 ? duration / parts.length : 4;
-    let vtt = 'WEBVTT\n\n';
+    // Longer sentences take longer to say, so each cue gets time in proportion
+    // to its number of characters (keeps captions in step with the narration).
+    const total = isFinite(duration) && duration > 0 ? duration : parts.length * 4;
+    const chars = parts.reduce(function (sum, p) { return sum + p.length; }, 0);
+    let vtt = 'WEBVTT\n\n', t = 0;
     parts.forEach(function (p, i) {
-      vtt += (i + 1) + '\n' + stamp(i * each) + ' --> ' + stamp((i + 1) * each) + '\n' + p + '\n\n';
+      const len = (p.length / chars) * total;
+      vtt += (i + 1) + '\n' + stamp(t) + ' --> ' + stamp(t + len) + '\n' + p + '\n\n';
+      t += len;
     });
     return URL.createObjectURL(new Blob([vtt], { type: 'text/vtt' }));
   }

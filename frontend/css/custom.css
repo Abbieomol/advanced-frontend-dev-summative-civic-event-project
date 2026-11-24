@@ -1,14 +1,20 @@
 /*
  * custom.css
+ * Theme: Nairobi colours (green #0a6a38, yellow #ffd100, white, black) and Arial.
  * A few shared styles that are easier to write once than to repeat as
  * Tailwind classes on every element (buttons, inputs, skeletons, focus).
  * Colours meet WCAG AA contrast on white.
  */
 
 /* Visible keyboard focus everywhere */
+body { font-family: Arial, Helvetica, sans-serif; }
+
+/* Focus: a black outline with a yellow halo. Yellow alone is too faint on
+   white (1.5:1), black alone is invisible on black; together they always show. */
 :focus-visible {
-  outline: 3px solid #f59e0b;
+  outline: 3px solid #0a0a0a;
   outline-offset: 2px;
+  box-shadow: 0 0 0 6px #ffd100;
 }
 
 /* Skip link: hidden until focused with Tab */
@@ -17,8 +23,9 @@
   left: 1rem;
   top: -3rem;
   z-index: 100;
-  background: #0f766e;
-  color: #fff;
+  background: #ffd100;
+  color: #0a0a0a;
+  font-weight: 700;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
 }
@@ -41,10 +48,13 @@
 }
 .btn:active:not(:disabled) { transform: translateY(1px); }
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn-primary { background: #0f766e; color: #fff; }
-.btn-primary:hover:not(:disabled) { background: #115e59; }
-.btn-secondary { background: #fff; color: #0f172a; border-color: #cbd5e1; }
-.btn-secondary:hover:not(:disabled) { background: #f1f5f9; }
+.btn-primary { background: #0a6a38; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #08552d; }
+.btn-secondary { background: #fff; color: #0a0a0a; border-color: #a3a3a3; }
+.btn-secondary:hover:not(:disabled) { background: #f5f5f5; }
+/* Yellow call-to-action, always with black text */
+.btn-accent { background: #ffd100; color: #0a0a0a; }
+.btn-accent:hover:not(:disabled) { background: #f5c400; }
 .btn-danger { background: #b91c1c; color: #fff; }
 .btn-danger:hover:not(:disabled) { background: #991b1b; }
 .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
@@ -57,9 +67,9 @@
   border-radius: 0.5rem;
   padding: 0.55rem 0.75rem;
   background: #fff;
-  color: #0f172a;
+  color: #0a0a0a;
 }
-.input:focus { border-color: #0f766e; outline: 3px solid #99f6e4; outline-offset: 0; }
+.input:focus { border-color: #0a6a38; outline: 2px solid #0a6a38; outline-offset: 0; box-shadow: 0 0 0 5px #ffd100; }
 .input[aria-invalid="true"] { border-color: #b91c1c; }
 .label { display: block; font-weight: 600; font-size: 0.9rem; color: #1e293b; margin-bottom: 0.3rem; }
 
@@ -94,4 +104,10 @@
 /* Respect users who prefer less motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* Thin Nairobi stripe under the header: green, yellow, black */
+.nairobi-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, #0a6a38 0 40%, #ffd100 40% 70%, #0a0a0a 70% 100%);
 }

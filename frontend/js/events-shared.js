@@ -66,7 +66,7 @@ const EventCard = (function () {
   function imageHtml(event) {
     const url = event.metadata && event.metadata.image_url ? Api.fileUrl(event.metadata.image_url) : '';
     if (url) {
-      return '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" loading="lazy" class="h-40 w-full object-cover" onerror="this.replaceWith(EventCard.placeholder())">';
+      return '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" loading="lazy" class="h-40 w-full object-cover object-top" onerror="this.replaceWith(EventCard.placeholder())">';
     }
     return EventCard.placeholder().outerHTML;
   }
@@ -74,7 +74,7 @@ const EventCard = (function () {
   // Shown when an event has no image (or it fails to load).
   function placeholder() {
     const div = document.createElement('div');
-    div.className = 'flex h-40 w-full items-center justify-center bg-gradient-to-br from-teal-600 to-slate-800 text-white';
+    div.className = 'flex h-40 w-full items-center justify-center bg-gradient-to-br from-brand-700 to-ink text-sun-400';
     div.setAttribute('aria-hidden', 'true');
     div.innerHTML = '<svg class="h-12 w-12 opacity-80" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>';
     return div;
@@ -82,9 +82,9 @@ const EventCard = (function () {
 
   function badgesHtml(event) {
     let html = '';
-    if (event.published === false) html += '<span class="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">Unpublished</span>';
+    if (event.published === false) html += '<span class="rounded bg-sun-200 px-2 py-0.5 text-xs font-semibold text-ink">Unpublished</span>';
     if (isPast(event)) html += '<span class="rounded bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">Ended</span>';
-    else if (Registrations.status(event.id) === 'registered') html += '<span class="rounded bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">✓ You\'re registered</span>';
+    else if (Registrations.status(event.id) === 'registered') html += '<span class="rounded bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-900">✓ You\'re registered</span>';
     else if (Registrations.status(event.id) === 'cancelled') html += '<span class="rounded bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-700">Registration cancelled</span>';
     return html ? '<div class="flex flex-wrap gap-2">' + html + '</div>' : '';
   }

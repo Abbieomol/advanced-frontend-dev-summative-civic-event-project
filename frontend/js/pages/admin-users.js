@@ -41,7 +41,7 @@ $(function () {
   function switchHtml(u) {
     const on = u.is_active !== false;
     const self = me && u.id === me.id;
-    return '<button type="button" class="status-switch relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ' + (on ? 'bg-teal-600' : 'bg-slate-300') + '" ' +
+    return '<button type="button" class="status-switch relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ' + (on ? 'bg-brand-600' : 'bg-slate-300') + '" ' +
       'role="switch" aria-checked="' + on + '" data-id="' + UI.escapeHtml(u.id) + '" aria-label="Account active: ' + UI.escapeHtml(u.full_name) + '"' +
       (self ? ' disabled title="You can\'t disable your own account"' : '') + '>' +
       '<span class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition ' + (on ? 'translate-x-5' : 'translate-x-0.5') + '"></span></button>';

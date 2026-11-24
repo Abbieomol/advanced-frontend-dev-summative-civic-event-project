@@ -44,12 +44,17 @@ $(function () {
   function imageHtml() {
     const url = event.metadata && event.metadata.image_url ? Api.fileUrl(event.metadata.image_url) : '';
     if (!url) return '';
-    return '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" class="h-64 w-full rounded-2xl object-cover sm:h-80" onerror="this.remove()">';
+    // object-contain shows the whole picture, so portrait posters aren't cropped;
+    // a blurred copy fills the space behind it.
+    return '<div class="relative flex justify-center overflow-hidden rounded-2xl bg-ink">' +
+      '<img src="' + UI.escapeHtml(url) + '" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-xl">' +
+      '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" class="relative max-h-[30rem] w-auto max-w-full object-contain" onerror="this.parentNode.remove()">' +
+    '</div>';
   }
 
   function mapLink() {
     if (!event.location) return '';
-    return '<a class="text-sm font-semibold text-teal-800 underline" target="_blank" rel="noopener" ' +
+    return '<a class="text-sm font-semibold text-brand-800 underline" target="_blank" rel="noopener" ' +
       'href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(event.location) + '">' +
       'Open in Google Maps<span class="sr-only"> (opens in a new tab)</span></a>';
   }

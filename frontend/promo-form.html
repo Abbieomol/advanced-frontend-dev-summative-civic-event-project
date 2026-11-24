@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Promo form · CivicEvents+</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/theme.js"></script>
   <link rel="stylesheet" href="css/custom.css">
 </head>
 <body data-page="promo-form" class="flex min-h-screen flex-col bg-slate-50 text-slate-900">
@@ -14,7 +15,7 @@
     <div id="admin-nav"></div>
 
     <div class="max-w-3xl">
-      <nav aria-label="Breadcrumb" class="text-sm"><a href="promos.html" class="font-semibold text-teal-800 underline">‹ All promos</a></nav>
+      <nav aria-label="Breadcrumb" class="text-sm"><a href="promos.html" class="font-semibold text-brand-800 underline">‹ All promos</a></nav>
       <h1 id="form-title" class="mt-2 text-3xl font-bold">New promo</h1>
       <p class="mt-1 text-slate-600">Every promo needs captions so it's accessible to everyone.</p>
 
@@ -36,10 +37,10 @@
           <label for="video" class="label">Video file <span id="video-required" aria-hidden="true">*</span></label>
           <p id="video-hint" class="mb-2 text-sm text-slate-600">MP4, MOV, AVI or MKV, up to 8 MB. MP4 plays in every browser.</p>
           <input id="video" type="file" accept=".mp4,.mov,.avi,.mkv,video/*" aria-describedby="video-hint"
-            class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-teal-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-teal-800">
+            class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-brand-800">
           <div id="video-preview" class="mt-3 hidden">
             <p class="text-sm font-semibold text-slate-700" id="preview-label">Preview</p>
-            <video controls muted playsinline preload="metadata" class="mt-1 aspect-video w-full rounded-lg bg-black" aria-labelledby="preview-label"></video>
+            <video controls muted playsinline preload="metadata" class="mt-1 max-h-80 w-full rounded-lg bg-ink object-contain" aria-labelledby="preview-label"></video>
           </div>
         </div>
 
@@ -50,7 +51,7 @@
         </div>
 
         <div class="flex items-start gap-3 rounded-lg bg-slate-50 p-3">
-          <input id="published" type="checkbox" checked class="mt-1 h-4 w-4 accent-teal-700" aria-describedby="published-hint">
+          <input id="published" type="checkbox" checked class="mt-1 h-4 w-4 accent-brand-700" aria-describedby="published-hint">
           <div>
             <label for="published" class="font-semibold">Published</label>
             <p id="published-hint" class="text-sm text-slate-600">Untick to keep it hidden from residents. You can publish it later.</p>
@@ -59,7 +60,7 @@
 
         <div id="upload-progress" class="hidden" role="progressbar" aria-label="Upload progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="flex justify-between text-sm"><span>Uploading…</span><span class="pct">0%</span></div>
-          <div class="mt-1 h-2 rounded bg-slate-200"><div class="bar h-2 rounded bg-teal-600" style="width:0%"></div></div>
+          <div class="mt-1 h-2 rounded bg-slate-200"><div class="bar h-2 rounded bg-brand-600" style="width:0%"></div></div>
         </div>
 
         <div class="flex flex-wrap gap-3">

@@ -48,8 +48,10 @@ $(function () {
         '<a href="promo-form.html?id=' + encodeURIComponent(item.id) + '" class="btn btn-secondary btn-sm">Edit</a>' +
         '<button type="button" id="delete-btn" class="btn btn-danger btn-sm">Delete</button></div>' +
 
-      '<div class="overflow-hidden rounded-2xl bg-black">' +
-        '<video id="video" controls playsinline preload="metadata" class="aspect-video w-full" aria-label="' + UI.escapeHtml(item.title) + '">' +
+      // No fixed aspect ratio: square or portrait videos keep their shape
+      // (centred, at most 70% of the screen height) instead of being stretched.
+      '<div class="overflow-hidden rounded-2xl bg-ink">' +
+        '<video id="video" controls playsinline preload="metadata" class="mx-auto block max-h-[70vh] w-full object-contain" aria-label="' + UI.escapeHtml(item.title) + '">' +
           '<source src="' + UI.escapeHtml(url) + '">' +
           '<p class="p-4 text-white">Your browser can\'t play this video. <a class="underline" href="' + UI.escapeHtml(url) + '" download>Download it</a> instead. The transcript is below.</p>' +
         '</video>' +

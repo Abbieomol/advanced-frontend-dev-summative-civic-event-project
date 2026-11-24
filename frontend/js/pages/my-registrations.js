@@ -61,7 +61,7 @@ $(function () {
       $tab.find('.count').text('(' + n + ')');
       const selected = tab === activeTab;
       $tab.attr('aria-selected', String(selected)).attr('tabindex', selected ? '0' : '-1')
-        .toggleClass('border-teal-700 text-teal-800', selected)
+        .toggleClass('border-brand-700 text-brand-800', selected)
         .toggleClass('border-transparent text-slate-600', !selected);
     });
     $list.attr('aria-labelledby', 'tab-' + activeTab);
