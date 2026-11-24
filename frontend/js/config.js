@@ -6,7 +6,7 @@ const CONFIG = {
   FILES_BASE_URL: 'http://localhost:4000',
   EVENTS_PER_PAGE: 6,
   REQUEST_TIMEOUT_MS: 20000,
-  SUPPORT_EMAIL: 'support@civicevents.example',
+  SUPPORT_EMAIL: 'support@civic.test',
 
   // Same limits as the backend (upload.middleware.js)
   UPLOADS: {
