@@ -1,11 +1,7 @@
-/**
- * pages/promo-form.js
- * Admin create (POST /promos) and edit (PUT /promos/:id) form, sent as
- * multipart/form-data with the file key "video". Title, description and
- * caption_text are required by the backend.
- */
+// Admin form for promos (title, description and captions are required)
+
 $(function () {
-  // ROLE GUARD (admins only)
+  // ROLE GUARD: admins only
   if (!Auth.requireAdmin()) return;
   Layout.init();
 
@@ -79,8 +75,7 @@ $(function () {
     const opts = { silent: true, onProgress: file ? function (p) { UI.setProgress($('#upload-progress'), p); } : null };
     const request = editId
       ? Api.put('/promos/' + encodeURIComponent(editId), data, opts)
-      // New promos are always created as published by the backend, so if
-      // "Published" is unticked we unpublish it straight after creating it.
+      // new promos are always published, so unpublish right after if the box was unticked
       : Api.post('/promos', data, opts).then(function (res) {
           if (published) return res;
           return Api.patch('/promos/' + encodeURIComponent(res.data.id) + '/unpublish', {}, { silent: true })
@@ -89,7 +84,7 @@ $(function () {
 
     request
       .then(function (res) {
-        PromoCache.clear(); // the list changed, so drop the cached copy
+        PromoCache.clear();
         UI.flash(editId ? 'Promo updated.' : (published ? 'Promo created. Residents have been notified.' : 'Promo saved as unpublished.'), 'success');
         window.location.replace('promo.html?id=' + encodeURIComponent(res.data.id));
       })

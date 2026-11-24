@@ -1,34 +1,21 @@
-/**
- * auth.js
- * Global auth context: stores the token and the signed-in user, and holds
- * every client-side ROLE GUARD used by the pages.
- *
- * IMPORTANT: these guards only improve the user experience (hiding buttons,
- * redirecting away from pages). Real security is enforced by the backend:
- * every protected route checks the JWT, and admin routes also check the role
- * and answer 403 if the user is not an admin.
- */
+// Keeps track of the logged-in user and token, plus all the role guards.
+// Note: these guards are just for the UI. The backend still checks the token
+// and role on every request, so this isn't the real security.
+
 const Auth = (function () {
   const TOKEN_KEY = 'ce_token';
   const USER_KEY = 'ce_user';
 
-  /*
-   * Storage choice:
-   * - "Remember me" ticked   -> localStorage: survives closing the browser,
-   *   but any script on the page (e.g. an XSS bug) could read it.
-   * - "Remember me" unticked -> sessionStorage: cleared when the tab closes,
-   *   so a stolen laptop or shared computer exposes less.
-   * The token is short-lived (1 hour on this backend), which limits the risk.
-   */
   function activeStore() {
     return localStorage.getItem(TOKEN_KEY) ? localStorage : sessionStorage;
   }
 
+  // "Keep me signed in" -> localStorage (survives closing the browser).
+  // Otherwise sessionStorage, which is cleared when the tab closes (safer on shared PCs).
   function save(token, user, remember) {
     clear();
     const store = remember ? localStorage : sessionStorage;
     store.setItem(TOKEN_KEY, token);
-    // Keep only what the UI needs: { id, full_name, email, role }
     store.setItem(USER_KEY, JSON.stringify({
       id: user.id,
       full_name: user.full_name,
@@ -63,8 +50,7 @@ const Auth = (function () {
     });
   }
 
-  // A JWT is header.payload.signature; the payload is base64url JSON
-  // containing "exp" (expiry, in seconds since 1970).
+  // The middle part of a JWT is base64 JSON with the expiry time (exp)
   function decodeToken(jwt) {
     try {
       const payload = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -78,7 +64,8 @@ const Auth = (function () {
     const jwt = token();
     if (!jwt) return true;
     const payload = decodeToken(jwt);
-    if (!payload || !payload.exp) return false; // let the backend decide
+    // no exp? let the backend decide
+    if (!payload || !payload.exp) return false;
     return Date.now() >= payload.exp * 1000;
   }
 
@@ -91,26 +78,14 @@ const Auth = (function () {
     return !!u && u.role === 'admin';
   }
 
-  /**
-   * Sign out and go to the login page.
-   * reason: 'expired' | 'logout' | 'unauthorized' (shown as a message there)
-   */
   function logout(reason) {
     clear();
     const query = reason ? '?reason=' + encodeURIComponent(reason) : '';
     window.location.replace('login.html' + query);
   }
 
-  // ---------------------------------------------------------------------
-  // ROLE GUARDS
-  // ---------------------------------------------------------------------
-
-  /**
-   * ROLE GUARD (signed-in users): call at the top of every protected page.
-   * - No token          -> send to login, remembering where they wanted to go.
-   * - Token has expired -> sign out with an "expired" message.
-   * Returns true only if the page may continue loading.
-   */
+  // ROLE GUARD: logged-in users only. Sends you to login if there's no token
+  // or it has expired.
   function requireLogin() {
     if (!token()) {
       const next = encodeURIComponent(window.location.pathname.split('/').pop() + window.location.search);
@@ -124,11 +99,7 @@ const Auth = (function () {
     return true;
   }
 
-  /**
-   * ROLE GUARD (admins only): call at the top of admin pages.
-   * Normal users are sent to their dashboard with an "access denied" message.
-   * The backend would also reject their API calls with 403.
-   */
+  // ROLE GUARD: admins only. Normal users get sent back to their dashboard.
   function requireAdmin() {
     if (!requireLogin()) return false;
     if (!isAdmin()) {
@@ -138,10 +109,7 @@ const Auth = (function () {
     return true;
   }
 
-  /**
-   * ROLE GUARD (guests only): login and signup pages call this so a user
-   * who is already signed in goes straight to the dashboard.
-   */
+  // ROLE GUARD: login/signup pages - skip them if you're already logged in
   function redirectIfLoggedIn() {
     if (isLoggedIn()) {
       window.location.replace('dashboard.html');
@@ -150,14 +118,8 @@ const Auth = (function () {
     return false;
   }
 
-  /**
-   * ROLE GUARD (UI visibility): removes elements that the current role
-   * must not see.
-   *   data-role="admin" -> only admins see it (create/edit/delete, admin links)
-   *   data-role="user"  -> only normal users see it (e.g. Register button)
-   * Elements are removed from the page, not just hidden, so keyboard and
-   * screen-reader users never reach them.
-   */
+  // ROLE GUARD: removes data-role="admin" stuff for normal users and
+  // data-role="user" stuff for admins (removed, not just hidden)
   function applyRoleVisibility(root) {
     const $root = $(root || document);
     const admin = isAdmin();

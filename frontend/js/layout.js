@@ -1,16 +1,7 @@
-/**
- * layout.js
- * Builds the shared header (logo, search, links, notification bell,
- * profile menu) and footer on every signed-in page, so navigation is
- * identical everywhere and only written once.
- *
- * A page opts in with:
- *   <body data-page="events">           (highlights the current link)
- *   <div id="site-header"></div> ... <div id="site-footer"></div>
- */
+// Builds the header, footer, notification drawer and admin sidebar on every page
+
 const Layout = (function () {
 
-  // Links shown in the main navigation. "role" limits who sees each one.
   const NAV_LINKS = [
     { page: 'dashboard', href: 'dashboard.html', label: 'Home' },
     { page: 'events', href: 'events.html', label: 'Events' },
@@ -26,8 +17,7 @@ const Layout = (function () {
       const cls = mobile
         ? 'block rounded-md px-3 py-2 text-base font-medium ' + (current ? 'bg-brand-50 text-brand-800' : 'text-slate-700 hover:bg-slate-100')
         : 'rounded-md px-3 py-2 text-sm font-medium ' + (current ? 'bg-brand-50 text-brand-800' : 'text-slate-700 hover:bg-slate-100');
-      // ROLE GUARD (UI): admin-only links carry data-role="admin" and are
-      // removed for normal users by Auth.applyRoleVisibility().
+      // ROLE GUARD: admin links get data-role="admin" so normal users never see them
       return '<a href="' + link.href + '" class="' + cls + '"' +
         (current ? ' aria-current="page"' : '') +
         (link.role ? ' data-role="' + link.role + '"' : '') + '>' + link.label + '</a>';
@@ -59,7 +49,6 @@ const Layout = (function () {
               '<svg aria-hidden="true" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>' +
               '<span id="bell-count" class="absolute -right-0.5 -top-0.5 hidden min-w-[1.25rem] rounded-full bg-sun-400 px-1 text-center text-xs font-bold text-ink ring-2 ring-white"></span>' +
             '</button>' +
-            // Notification drawer: latest notifications, opened from the bell
             '<div id="notif-panel" class="fixed inset-x-2 top-16 hidden max-h-[75vh] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96" role="region" aria-label="Recent notifications">' +
               '<div class="flex items-center justify-between border-b border-slate-100 px-4 py-3">' +
                 '<p class="font-semibold">Notifications</p>' +
@@ -131,7 +120,6 @@ const Layout = (function () {
       '</footer>';
   }
 
-  // ---------- Dropdown and mobile menu behaviour ----------
   function bindMenus() {
     const $btn = $('#profile-button'), $menu = $('#profile-menu');
 
@@ -160,14 +148,11 @@ const Layout = (function () {
 
     $('#logout-button').on('click', function () { Auth.logout('logout'); });
 
-    // Keep the current search term in the box on the events page
     const q = UI.param('q');
     if (q) $('#global-search-input, #mobile-search-input').val(q);
   }
 
-  // ---------- Notification bell ----------
-  // The API has no "mark as read" endpoint, so read notification IDs are
-  // remembered in localStorage per user. notifications.html uses the same store.
+  // There's no "mark as read" endpoint, so read notifications are saved in localStorage
   const ReadStore = {
     key: function () { return 'ce_read_notifications_' + ((Auth.user() || {}).id || 'anon'); },
     ids: function () {
@@ -182,7 +167,7 @@ const Layout = (function () {
 
   let notifications = [];
 
-  // Where a notification should take the user, based on its metadata
+  // Link a notification to its event / announcement / promo using its metadata
   function notificationLink(n) {
     const m = n.metadata || {};
     if (m.event_id) return { href: 'event.html?id=' + encodeURIComponent(m.event_id), label: 'View event' };
@@ -240,7 +225,7 @@ const Layout = (function () {
     $(document).on('keydown', function (e) {
       if (e.key === 'Escape' && !$panel.hasClass('hidden')) { close(); $bell.trigger('focus'); }
     });
-    // Opening one marks it as read straight away (optimistic: stored locally)
+    // opening one marks it read straight away
     $panel.on('click', '.notif-item', function () { ReadStore.markRead($(this).data('id')); });
     $('#notif-mark-all').on('click', function () {
       notifications.forEach(function (n) { ReadStore.markRead(n.id); });
@@ -249,8 +234,6 @@ const Layout = (function () {
     });
   }
 
-  // ---------- Admin sidebar ----------
-  // Admin pages include <div id="admin-nav"></div>; this fills it.
   const ADMIN_LINKS = [
     { page: 'admin-dashboard', href: 'admin-dashboard.html', label: 'Overview' },
     { page: 'admin-users', href: 'admin-users.html', label: 'Users' },
@@ -260,12 +243,12 @@ const Layout = (function () {
     { page: 'notifications', href: 'notifications.html', label: 'Manage notifications' }
   ];
 
+  // ROLE GUARD: the admin sidebar is only rendered on admin pages, and it's data-role="admin" too
   function renderAdminNav() {
     const $slot = $('#admin-nav');
     if (!$slot.length) return;
     const page = $('body').data('page');
     $slot.replaceWith(
-      // ROLE GUARD (UI): the whole sidebar is admin-only.
       '<nav aria-label="Admin" data-role="admin" class="mb-6 lg:mb-0">' +
         '<p class="mb-2 hidden text-xs font-semibold uppercase tracking-wide text-slate-500 lg:block">Admin</p>' +
         '<ul class="flex gap-2 overflow-x-auto pb-2 lg:flex-col lg:gap-1 lg:pb-0">' +
@@ -279,9 +262,7 @@ const Layout = (function () {
     );
   }
 
-  /**
-   * Call once per signed-in page, after Auth.requireLogin().
-   */
+  // Call this on every logged-in page (after requireLogin)
   function init() {
     const page = $('body').data('page');
     $('#site-header').replaceWith(headerHtml(page));

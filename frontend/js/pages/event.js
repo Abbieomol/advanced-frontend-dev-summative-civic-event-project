@@ -1,10 +1,7 @@
-/**
- * pages/event.js
- * Event detail: image, description, dates, location with a map link,
- * and the Register / Cancel registration panel.
- */
+// Event details page: info, map link, register/cancel, attendees (admin) and feedback
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -21,7 +18,7 @@ $(function () {
     $.when(Api.get('/events/' + encodeURIComponent(eventId), null, { silent: true }), Registrations.load())
       .then(function (res) {
         event = res.data;
-        // ROLE GUARD (UI): unpublished events are hidden from normal users.
+        // ROLE GUARD: normal users can't open unpublished events
         if (event.published === false && !Auth.isAdmin()) {
           $detail.html(UI.emptyState('Event not available', "This event isn't published yet.", 'events.html', 'Browse events'));
           return;
@@ -44,8 +41,7 @@ $(function () {
   function imageHtml() {
     const url = event.metadata && event.metadata.image_url ? Api.fileUrl(event.metadata.image_url) : '';
     if (!url) return '';
-    // object-contain shows the whole picture, so portrait posters aren't cropped;
-    // a blurred copy fills the space behind it.
+    // object-contain so portrait posters aren't cropped, with a blurred copy behind
     return '<div class="relative flex justify-center overflow-hidden rounded-2xl bg-ink">' +
       '<img src="' + UI.escapeHtml(url) + '" alt="" aria-hidden="true" class="absolute inset-0 h-full w-full scale-110 object-cover opacity-40 blur-xl">' +
       '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" class="relative max-h-[30rem] w-auto max-w-full object-contain" onerror="this.parentNode.remove()">' +
@@ -59,13 +55,12 @@ $(function () {
       'Open in Google Maps<span class="sr-only"> (opens in a new tab)</span></a>';
   }
 
-  // The panel on the right: depends on role, date and registration status.
   function registrationPanel() {
     const status = Registrations.status(event.id);
     let body;
 
+    // ROLE GUARD: admins manage events instead of registering
     if (Auth.isAdmin()) {
-      // ROLE GUARD (UI): admins manage events rather than registering.
       body = '<p class="text-sm text-slate-700">You\'re signed in as an admin. Admins manage events; registration is for residents.</p>';
     } else if (EventCard.isPast(event)) {
       body = '<p class="text-sm text-slate-700">This event has ended.</p>';
@@ -73,9 +68,8 @@ $(function () {
       body = '<p class="flex items-center gap-2 font-semibold text-emerald-800"><span aria-hidden="true">✓</span> You\'re registered</p>' +
         '<p class="mt-1 text-sm text-slate-600">We\'ll see you there. Can\'t make it? Free up your place for someone else.</p>' +
         '<button type="button" id="cancel-btn" class="btn btn-secondary mt-4 w-full">Cancel registration</button>';
+    // backend blocks re-registering after a cancel, so explain instead of showing a button
     } else if (status === 'cancelled') {
-      // The backend keeps cancelled rows and rejects a second registration (409),
-      // so we explain that instead of showing a Register button that would fail.
       body = '<p class="font-semibold text-slate-800">You cancelled your registration.</p>' +
         '<p class="mt-1 text-sm text-slate-600">This system doesn\'t allow registering again for the same event. Contact the organisers at <a class="underline" href="mailto:' + CONFIG.SUPPORT_EMAIL + '">' + CONFIG.SUPPORT_EMAIL + '</a> if you need a place.</p>';
     } else {
@@ -92,7 +86,7 @@ $(function () {
       '<div class="mt-6 grid gap-8 lg:grid-cols-3">' +
         '<article class="lg:col-span-2">' +
           (event.published === false ? '<p class="mb-2 inline-block rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">Unpublished</p>' : '') +
-          // ROLE GUARD (UI): admin toolbar, removed for normal users by applyRoleVisibility
+          // ROLE GUARD: admin toolbar
           '<div class="mb-3 flex flex-wrap gap-2" data-role="admin" hidden>' +
             '<a href="event-form.html?id=' + encodeURIComponent(event.id) + '" class="btn btn-secondary btn-sm">Edit event</a>' +
             '<button type="button" id="delete-event" class="btn btn-danger btn-sm">Delete event</button>' +
@@ -113,7 +107,7 @@ $(function () {
     Auth.applyRoleVisibility($detail);
   }
 
-  // ----- Admin: list of people registered (GET /event-registrations/event/:id/attendees) -----
+  // ROLE GUARD: attendee list is admin-only (the endpoint is too)
   function loadAttendees() {
     if (!Auth.isAdmin()) return;
     const $body = $('#attendees-body').html(UI.skeletonRows(2));
@@ -144,7 +138,6 @@ $(function () {
     });
   });
 
-  // ----- Register / cancel -----
   $detail.on('click', '#register-btn', function () {
     const $btn = $(this);
     UI.setLoading($btn, true, 'Registering…');

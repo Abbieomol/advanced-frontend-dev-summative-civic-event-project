@@ -1,18 +1,13 @@
-/**
- * pages/admin-dashboard.js
- * Admin overview from GET /dashboard/admin: stat tiles plus two bar charts
- * (built with plain HTML/CSS, since only HTML, Tailwind and jQuery are allowed).
- * Each chart has hover/focus tooltips and a "Show as table" view.
- * Data refreshes every 60 seconds and with the Refresh button.
- */
+// Admin dashboard: stat tiles + two bar charts (plain HTML/CSS, no chart library)
+
 $(function () {
-  // ROLE GUARD (admins only): normal users are redirected; the API also
-  // answers 403 to non-admins for /dashboard/admin.
+  // ROLE GUARD: admins only (the API returns 403 to everyone else)
   if (!Auth.requireAdmin()) return;
   Layout.init();
 
   const REFRESH_MS = 60000;
-  const n = function (v) { return Number(v || 0); }; // Postgres COUNT() arrives as a string
+  // COUNT() comes back as a string
+  const n = function (v) { return Number(v || 0); };
 
   function load(manual) {
     const $tiles = $('#tiles');
@@ -34,7 +29,6 @@ $(function () {
       .always(function () { $tiles.attr('aria-busy', 'false'); if (manual) UI.setLoading($btn, false); });
   }
 
-  // ---------- Stat tiles ----------
   function tile(label, value, sub, href) {
     return '<a href="' + href + '" class="card-hover block rounded-xl border border-slate-200 bg-white p-5">' +
       '<p class="text-sm font-medium text-slate-600">' + label + '</p>' +
@@ -56,12 +50,7 @@ $(function () {
     ].join(''));
   }
 
-  // ---------- Bar charts ----------
-  // Single series, one hue (Nairobi green), so no legend is needed: the title names it.
-  // Bars have 4px rounded ends at the data end, a recessive grid, and a
-  // tooltip on hover AND keyboard focus.
-  // Round the axis top up to 2, 4, 6, 8 or 10 × a power of ten, so the
-  // halfway gridline is always a whole number.
+  // round the top of the axis up so the middle gridline is a whole number
   function niceMax(max) {
     if (max <= 2) return 2;
     const pow = Math.pow(10, Math.floor(Math.log10(max)));
@@ -142,7 +131,7 @@ $(function () {
     $('#growth-table').html(rows.length ? tableHtml('New users per month', ['Month', 'New users'], rows) : '');
   }
 
-  // ---------- Tooltip (mouse hover and keyboard focus) ----------
+  // tooltip works on hover and keyboard focus
   const $tip = $('#chart-tip');
   $('main').on('mouseenter focus', '.bar-hit', function (e) {
     const r = this.getBoundingClientRect();
@@ -155,7 +144,6 @@ $(function () {
   });
   $('main').on('mouseleave blur', '.bar-hit', function () { $tip.addClass('hidden'); });
 
-  // Chart <-> table toggle
   $('.table-toggle').on('click', function () {
     const $t = $('#' + $(this).attr('aria-controls'));
     const show = $t.hasClass('hidden');
@@ -165,6 +153,7 @@ $(function () {
   });
 
   $('#refresh').on('click', function () { load(true); });
+  // refresh every minute
   setInterval(function () { if (!document.hidden) load(false); }, REFRESH_MS);
   load(false);
 });

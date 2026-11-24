@@ -1,12 +1,8 @@
-/**
- * pages/events.js
- * Events list with search, location and date filters, and pagination.
- *
- * The backend's GET /events returns every event at once (no server-side
- * filtering or paging), so filtering and paging happen here in the browser.
- */
+// Events list. GET /events returns every event and ignores query params,
+// so search, filters and pagination all happen here in the browser.
+
 $(function () {
-  // ROLE GUARD (signed-in users): the events API requires a token.
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -14,7 +10,6 @@ $(function () {
   let allEvents = [];
   let page = 1;
 
-  // Start with the search term from the navbar search, if any
   $('#filter-q').val(UI.param('q') || '');
 
   function load() {
@@ -22,7 +17,6 @@ $(function () {
     $('#results-count').text('Loading events…');
     $('#pagination').empty();
 
-    // Load events and this user's registrations together
     $.when(Api.get('/events', null, { silent: true }), Registrations.load())
       .then(function (eventsRes) {
         allEvents = eventsRes.data || [];
@@ -54,7 +48,7 @@ $(function () {
     const from = $('#filter-from').val() ? new Date($('#filter-from').val() + 'T00:00:00') : null;
     const to = $('#filter-to').val() ? new Date($('#filter-to').val() + 'T23:59:59') : null;
     const includePast = $('#filter-past').is(':checked');
-    // ROLE GUARD (UI): normal users only ever see published events.
+    // ROLE GUARD: only admins can see unpublished events
     const includeUnpublished = Auth.isAdmin() && $('#filter-unpublished').is(':checked');
 
     return allEvents.filter(function (e) {
@@ -112,15 +106,13 @@ $(function () {
     $nav.html(html);
   }
 
-  // ----- Events -----
   $('#pagination').on('click', '.page-btn', function () {
     page = Number($(this).data('page'));
     render();
-    $('#main').trigger('focus'); // move focus to the top for keyboard users
+    $('#main').trigger('focus');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // Re-filter as the user types (with a short delay) or changes a filter
   let typingTimer;
   $('#filter-q').on('input', function () {
     clearTimeout(typingTimer);
@@ -130,14 +122,13 @@ $(function () {
   $('#filters').on('submit', function (e) { e.preventDefault(); page = 1; render(); syncUrl(); });
   $('#filters').on('reset', function () { setTimeout(function () { page = 1; render(); syncUrl(); }, 0); });
 
-  // Keep ?q= in the address bar so a search can be bookmarked or shared
+  // keep ?q= in the URL so searches can be shared
   function syncUrl() {
     const q = $.trim($('#filter-q').val());
     history.replaceState(null, '', q ? '?q=' + encodeURIComponent(q) : 'events.html');
   }
 
   EventCard.bindRegister($grid, render);
-  // Admin: remove the deleted event from the list without reloading
   EventCard.bindDelete($grid, function (id) {
     allEvents = allEvents.filter(function (e) { return e.id !== id; });
     fillLocations();

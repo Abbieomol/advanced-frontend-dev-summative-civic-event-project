@@ -1,23 +1,7 @@
-/**
- * api.js
- * One wrapper around $.ajax for every backend call, so that:
- *  - the Authorization: Bearer <token> header is always attached,
- *  - JSON and file uploads (FormData) are both handled,
- *  - errors are turned into friendly messages in one place,
- *  - 401 signs the user out, 403 explains the permission problem,
- *  - network failures offer a Retry button.
- *
- * Every function returns a promise. Success gives the backend's JSON body
- * ({ status, message, data }). Failure gives { status, message, errors }.
- */
+// Wrapper around $.ajax so every request gets the token and the same error handling
+
 const Api = (function () {
 
-  /**
-   * options:
-   *   silent: true          -> don't show a toast on error (caller handles it)
-   *   skipAuthRedirect: true -> don't sign out on 401 (used by the login form)
-   *   onProgress: fn(percent) -> upload progress for FormData requests
-   */
   function request(method, path, data, options) {
     options = options || {};
 
@@ -30,10 +14,11 @@ const Api = (function () {
     };
 
     const jwt = Auth.token();
+    // attach the token to every request
     if (jwt) settings.headers.Authorization = 'Bearer ' + jwt;
 
+    // file uploads: let the browser set the multipart headers itself
     if (data instanceof FormData) {
-      // File uploads: let the browser set multipart/form-data and the boundary.
       settings.data = data;
       settings.processData = false;
       settings.contentType = false;
@@ -41,9 +26,10 @@ const Api = (function () {
       settings.data = JSON.stringify(data);
       settings.contentType = 'application/json';
     } else if (data) {
-      settings.data = data; // GET query parameters
+      settings.data = data;
     }
 
+    // upload progress bar
     if (options.onProgress) {
       settings.xhr = function () {
         const xhr = $.ajaxSettings.xhr();
@@ -68,7 +54,7 @@ const Api = (function () {
     );
   }
 
-  // Turn a failed jQuery XHR into { status, message, errors }.
+  // Turn a failed request into { status, message, errors } with a readable message
   function normaliseError(xhr, textStatus) {
     const body = xhr.responseJSON || {};
     const error = {
@@ -82,7 +68,6 @@ const Api = (function () {
         ? 'The server took too long to respond.'
         : "Can't reach the server. Check your internet connection and that the backend is running.";
     } else if (body.errors && body.errors.length) {
-      // express-validator errors: show the first specific message
       error.message = body.errors.map(function (e) { return e.message; }).join(' ');
     } else if (!error.message) {
       error.message = xhr.status >= 500
@@ -92,9 +77,9 @@ const Api = (function () {
     return error;
   }
 
+  // 401 = token expired -> log out (except on the login form, where it just means wrong password)
+  // 403 = not allowed, 0 = no connection (offer a retry)
   function handleError(error, options, retry) {
-    // 401: token missing, invalid or expired -> sign out (except on the login form,
-    // where 401 just means "wrong email or password").
     if (error.status === 401 && !options.skipAuthRedirect) {
       Auth.logout('expired');
       return;
@@ -123,8 +108,7 @@ const Api = (function () {
     patch: function (path, body, options) { return request('PATCH', path, body, options); },
     del: function (path, options) { return request('DELETE', path, null, options); },
 
-    // Uploaded files come back as full URLs, but older records may hold a
-    // relative path such as "uploads/events/x.png". This handles both.
+    // uploaded files can come back as full URLs or relative paths
     fileUrl: function (pathOrUrl) {
       if (!pathOrUrl) return '';
       if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;

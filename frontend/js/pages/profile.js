@@ -1,12 +1,7 @@
-/**
- * pages/profile.js
- * My profile: shows full_name, email, role and account status from
- * GET /users/profile/me, and lets the user change ONLY full_name and email
- * (PATCH /users/profile/me). Role and is_active are display-only; the
- * backend also rejects any attempt to send them.
- */
+// My profile: users can change their name and email, but not role or status
+
 $(function () {
-  // ROLE GUARD (signed-in users): any role can view and edit their own profile.
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -58,7 +53,6 @@ $(function () {
     $('#email').val(profile.email);
   }
 
-  // "Undo changes" puts back the saved values (not the empty HTML defaults)
   $form.on('reset', function (e) {
     e.preventDefault();
     UI.clearErrors($form);
@@ -77,13 +71,12 @@ $(function () {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { UI.fieldError($('#email'), 'Enter a valid email address, like name@example.com.'); valid = false; }
     if (!valid) { $form.find('[aria-invalid=true]').first().trigger('focus'); return; }
 
-    // Send only what changed. Never role or is_active.
+    // only send what changed, never role or is_active
     const changes = {};
     if (fullName !== profile.full_name) changes.full_name = fullName;
     if (email.toLowerCase() !== String(profile.email).toLowerCase()) changes.email = email;
     if ($.isEmptyObject(changes)) { UI.toast('Nothing to save: your details are unchanged.', 'info'); return; }
 
-    // Changing the sign-in email deserves a confirmation step.
     const confirmed = changes.email
       ? UI.confirm({
           title: 'Change your sign-in email?',
@@ -99,14 +92,13 @@ $(function () {
         .then(function (res) {
           profile = res.data;
           Auth.updateUser({ full_name: profile.full_name, email: profile.email });
-          // Reload so the header (initials, name in the menu) shows the new details.
           UI.flash('Your profile has been updated.', 'success');
           window.location.reload();
         })
         .fail(function (err) {
           UI.setLoading($btn, false);
+          // email already belongs to someone else
           if (err.status === 409) {
-            // Conflict: the email belongs to another account.
             UI.fieldError($('#email'), 'That email is already used by another account. Your email has not been changed.');
             $('#email').trigger('focus');
           } else if (err.status !== 401) {

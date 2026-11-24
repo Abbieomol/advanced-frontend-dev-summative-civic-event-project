@@ -1,12 +1,8 @@
-/**
- * ui.js
- * Small reusable UI helpers: toasts, confirm dialog, skeleton loaders,
- * empty/error states, button loading states, form errors and formatting.
- */
+// Small helpers used on every page: toasts, dialogs, loaders, form errors, formatting
+
 const UI = (function () {
 
-  // ---------- Text safety ----------
-  // Always escape API data before putting it into HTML strings.
+  // Always escape data from the API before putting it in HTML
   function escapeHtml(value) {
     return String(value === undefined || value === null ? '' : value)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -22,7 +18,6 @@ const UI = (function () {
     return new URLSearchParams(window.location.search).get(name);
   }
 
-  // ---------- Dates ----------
   const dateFmt = { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' };
   const timeFmt = { hour: 'numeric', minute: '2-digit' };
 
@@ -43,8 +38,6 @@ const UI = (function () {
     return formatDate(startIso) + ' – ' + formatDate(endIso);
   }
 
-  // ---------- Toasts ----------
-  // The container has aria-live="polite" so screen readers announce toasts.
   function toastContainer() {
     let $c = $('#toast-region');
     if (!$c.length) {
@@ -54,10 +47,7 @@ const UI = (function () {
     return $c;
   }
 
-  /**
-   * type: 'success' | 'error' | 'info'
-   * options: { actionLabel, onAction, duration }
-   */
+  // Toast messages. The container is aria-live so screen readers read them out.
   function toast(message, type, options) {
     type = type || 'info';
     options = options || {};
@@ -82,11 +72,10 @@ const UI = (function () {
     $t.find('.toast-action').on('click', function () { close(); options.onAction(); });
 
     toastContainer().append($t);
-    // Errors with an action stay until dismissed; others disappear.
     if (!options.actionLabel) setTimeout(close, options.duration || (type === 'error' ? 7000 : 4000));
   }
 
-  // A toast that survives a redirect (e.g. "Account created" -> login page).
+  // Toast that shows on the next page (e.g. "Account created" after redirecting)
   function flash(message, type) {
     sessionStorage.setItem('ce_flash', JSON.stringify({ message: message, type: type || 'success' }));
   }
@@ -95,12 +84,10 @@ const UI = (function () {
     const raw = sessionStorage.getItem('ce_flash');
     if (!raw) return;
     sessionStorage.removeItem('ce_flash');
-    try { const f = JSON.parse(raw); toast(f.message, f.type); } catch (e) { /* ignore */ }
+    try { const f = JSON.parse(raw); toast(f.message, f.type); } catch (e) { }
   }
 
-  // ---------- Confirm dialog ----------
-  // Accessible replacement for window.confirm(): focus moves into the dialog,
-  // Tab stays inside it, Esc cancels, and focus returns to the trigger after.
+  // Accessible replacement for confirm(): traps focus, Esc closes, focus goes back after
   function confirmDialog(opts) {
     const deferred = $.Deferred();
     const previous = document.activeElement;
@@ -129,7 +116,7 @@ const UI = (function () {
     $d.on('click', function (e) { if (e.target === this) close(false); });
     $(document).on('keydown.dialog', function (e) {
       if (e.key === 'Escape') close(false);
-      if (e.key === 'Tab') { // keep focus inside the dialog
+      if (e.key === 'Tab') {
         const $f = $d.find('button');
         if (e.shiftKey && document.activeElement === $f[0]) { e.preventDefault(); $f.last().focus(); }
         else if (!e.shiftKey && document.activeElement === $f.last()[0]) { e.preventDefault(); $f.first().focus(); }
@@ -141,7 +128,7 @@ const UI = (function () {
     return deferred.promise();
   }
 
-  // ---------- Loading, empty and error states ----------
+  // Grey placeholders while things load
   function skeletonCards(count) {
     let html = '';
     for (let i = 0; i < count; i++) {
@@ -171,7 +158,7 @@ const UI = (function () {
       '</div>';
   }
 
-  // Inline error with a Retry button, for when a whole section fails to load.
+  // Error box with a "Try again" button
   function errorState($target, message, onRetry) {
     $target.html(
       '<div class="col-span-full rounded-xl border border-red-200 bg-red-50 p-6 text-center" role="alert">' +
@@ -183,7 +170,6 @@ const UI = (function () {
     $target.find('.retry').on('click', onRetry);
   }
 
-  // Disable a button and show a spinner while a request is running.
   function setLoading($btn, loading, loadingText) {
     if (loading) {
       $btn.data('label', $btn.html());
@@ -194,8 +180,7 @@ const UI = (function () {
     }
   }
 
-  // ---------- Form errors ----------
-  // Each input has a sibling <p id="<input-id>-error"> linked by aria-describedby.
+  // Error under an input, linked with aria-describedby so screen readers announce it
   function fieldError($input, message) {
     const id = $input.attr('id') + '-error';
     let $msg = $('#' + id);
@@ -216,16 +201,11 @@ const UI = (function () {
     $form.find('.form-alert').addClass('hidden').text('');
   }
 
-  // Message box at the top of a form (for errors that aren't about one field).
   function formAlert($form, message) {
     $form.find('.form-alert').removeClass('hidden').text(message);
   }
 
-  // ---------- File uploads ----------
-  /**
-   * Checks a chosen file against CONFIG.UPLOADS[kind] ('image' | 'audio' | 'video').
-   * Returns an error message, or null if the file is OK.
-   */
+  // Check file type and size before uploading. Returns an error message or null.
   function checkFile(file, kind) {
     const rule = CONFIG.UPLOADS[kind];
     const ext = (file.name.split('.').pop() || '').toLowerCase();
@@ -238,7 +218,6 @@ const UI = (function () {
     return null;
   }
 
-  // Upload progress bar: an element with role="progressbar" and a .bar child.
   function setProgress($wrap, percent) {
     $wrap.removeClass('hidden');
     $wrap.attr('aria-valuenow', percent);
@@ -246,8 +225,6 @@ const UI = (function () {
     $wrap.find('.pct').text(percent + '%');
   }
 
-  // ---------- Formatting ----------
-  // 75 -> "1:15"
   function formatDuration(seconds) {
     if (!isFinite(seconds) || seconds < 0) return '–:––';
     seconds = Math.round(seconds);
@@ -255,7 +232,6 @@ const UI = (function () {
     return m + ':' + (s < 10 ? '0' : '') + s;
   }
 
-  // Duration in words for screen readers: 75 -> "1 minute 15 seconds"
   function durationWords(seconds) {
     if (!isFinite(seconds)) return 'unknown length';
     seconds = Math.round(seconds);
@@ -275,14 +251,13 @@ const UI = (function () {
     return 'just now';
   }
 
-  // Badge shown to admins on unpublished items
   function statusBadge(published) {
     return published === false
       ? '<span class="rounded bg-sun-200 px-2 py-0.5 text-xs font-semibold text-ink">Unpublished</span>'
       : '<span class="rounded bg-brand-100 px-2 py-0.5 text-xs font-semibold text-brand-900">Published</span>';
   }
 
-  // Star rating as text + hidden stars for screen readers
+  // Stars are hidden from screen readers, they get "4 out of 5 stars" instead
   function stars(rating) {
     rating = Math.round(Number(rating) || 0);
     let html = '<span aria-hidden="true" class="text-amber-500">';

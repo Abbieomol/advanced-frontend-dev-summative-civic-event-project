@@ -1,28 +1,17 @@
-/**
- * feedback.js
- * Feedback section on the event page.
- *
- * Backend rules:
- *  - POST /event-feedback       { event_id, rating (1–5), comment } (any signed-in user)
- *  - PUT  /event-feedback/:id   { rating, comment } (only your own)
- *  - GET  /event-feedback/my-feedback        (your own feedback, all events)
- *  - GET  /event-feedback/event/:event_id    (ADMIN ONLY: everyone's feedback)
- *  - One feedback per user per event (database UNIQUE constraint -> 409).
- *
- * So admins see the average and every review; normal users see their own
- * feedback and can add it once, then edit it.
- */
+// Feedback section on the event page.
+// Only admins can fetch everyone's feedback, so normal users just see and edit their own.
+// One feedback per user per event (the database enforces it).
+
 const Feedback = (function () {
   let $section, $body, event, mine = null;
 
   function init($sec, ev) {
     $section = $sec; event = ev; $body = $sec.find('#feedback-body');
     $section.removeAttr('hidden');
-    // ROLE GUARD (UI): admins get the full list; users get their own feedback.
+    // ROLE GUARD: admins get every review + the average, users get their own
     Auth.isAdmin() ? loadAll() : loadMine();
   }
 
-  // ---------- Admin view: average, breakdown and every review ----------
   function loadAll() {
     $body.html(UI.skeletonRows(2));
     Api.get('/event-feedback/event/' + encodeURIComponent(event.id), null, { silent: true })
@@ -63,7 +52,6 @@ const Feedback = (function () {
     '</li>';
   }
 
-  // ---------- User view: their own feedback (one per event) ----------
   function loadMine() {
     $body.html(UI.skeletonRows(1));
     Api.get('/event-feedback/my-feedback', null, { silent: true })
@@ -84,8 +72,7 @@ const Feedback = (function () {
     $('#edit-feedback').on('click', function () { showForm(mine); });
   }
 
-  // Rating is a group of 5 radio buttons styled as stars: keyboard users can
-  // use the arrow keys, and screen readers announce "3 stars, 3 of 5".
+  // Rating is 5 radio buttons styled as stars, so arrow keys work too
   function showForm(existing) {
     const rating = existing ? Number(existing.rating) : 0;
     let radios = '';
@@ -150,8 +137,8 @@ const Feedback = (function () {
       })
       .fail(function (err) {
         UI.setLoading($btn, false);
+        // already left feedback for this event
         if (err.status === 409) {
-          // Database allows one feedback per user per event
           UI.toast("You've already left feedback for this event. You can edit it instead.", 'info');
           loadMine();
         } else if (err.status !== 401) {

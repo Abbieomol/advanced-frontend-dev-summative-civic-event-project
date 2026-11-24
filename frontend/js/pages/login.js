@@ -1,15 +1,11 @@
-/**
- * pages/login.js
- * Sign-in form: validates input, calls POST /auth/login, stores the token
- * and user, then redirects to the dashboard (or the page they came from).
- */
+// Login page
+
 $(function () {
-  // ROLE GUARD (guests only): already signed in -> skip the login page.
+  // ROLE GUARD: already logged in -> go to dashboard
   if (Auth.redirectIfLoggedIn()) return;
 
   UI.showFlash();
 
-  // Explain why the user landed here (set by Auth.logout / requireLogin).
   const reasons = {
     expired: { text: 'Your session has expired. Please sign in again.', cls: 'border-amber-300 bg-amber-50 text-amber-900' },
     logout: { text: "You've been signed out.", cls: 'border-slate-300 bg-white text-slate-800' }
@@ -21,11 +17,9 @@ $(function () {
     $('#login-notice').removeClass('hidden').addClass(reason.cls).text(reason.text);
   }
 
-  // Pre-fill the email after signing up
   if (UI.param('email')) $('#email').val(UI.param('email'));
   $(UI.param('email') ? '#password' : '#email').trigger('focus');
 
-  // Show / hide password
   $('.toggle-password').on('click', function () {
     const $input = $('#' + $(this).attr('aria-controls'));
     const show = $input.attr('type') === 'password';
@@ -50,14 +44,14 @@ $(function () {
 
     UI.setLoading($btn, true, 'Signing in…');
 
-    // skipAuthRedirect: a 401 here means wrong credentials, not an expired session.
+    // skipAuthRedirect: a 401 here just means wrong email/password
     Api.post('/auth/login', { email: email, password: password }, { skipAuthRedirect: true, silent: true })
       .then(function (res) {
         Auth.save(res.data.token, res.data.user, $('#remember').is(':checked'));
         UI.flash('Welcome back, ' + res.data.user.full_name.split(' ')[0] + '!', 'success');
 
-        // Only follow "next" if it's a page in this app (no external redirects).
         const next = UI.param('next');
+        // only redirect to our own pages, not external links
         const safeNext = next && /^[\w-]+\.html(\?.*)?$/.test(next) ? next : 'dashboard.html';
         window.location.replace(safeNext);
       })

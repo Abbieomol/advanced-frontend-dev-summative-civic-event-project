@@ -1,19 +1,10 @@
-/**
- * events-shared.js
- * Code used by several event pages (dashboard, events list, event detail,
- * my registrations): the current user's registrations and the event card.
- */
+// Shared event stuff: the user's registrations and the event card
 
-/**
- * Registrations: remembers which events the signed-in user is registered for.
- * The backend keeps cancelled registrations (status = 'cancelled'), so we
- * look at the status, not just whether a row exists.
- */
 const Registrations = (function () {
   let byEvent = {};
 
+  // ROLE GUARD: admins don't register for events, so skip the request for them
   function load() {
-    // ROLE GUARD (UI): only normal users register, so admins skip this call.
     if (Auth.isAdmin()) { byEvent = {}; return $.Deferred().resolve([]).promise(); }
     return Api.get('/event-registrations/my-registrations', null, { silent: true }).then(function (res) {
       byEvent = {};
@@ -22,14 +13,17 @@ const Registrations = (function () {
     });
   }
 
+  // The backend keeps cancelled registrations (status "cancelled"),
+  // so we check the status, not just whether a row exists
   function status(eventId) {
-    return byEvent[eventId] ? byEvent[eventId].status : null; // 'registered' | 'cancelled' | null
+    return byEvent[eventId] ? byEvent[eventId].status : null;
   }
 
   function register(eventId) {
     return Api.post('/event-registrations/register', { event_id: eventId }, { silent: true })
       .then(function (res) { byEvent[eventId] = res.data; return res; })
       .fail(function (err) {
+        // the backend won't let you register again after cancelling
         if (err.status === 409 && status(eventId) === 'cancelled') {
           err.message = "You cancelled your place for this event earlier, and the system doesn't allow registering again. Please contact the organisers if you need a place.";
         } else if (err.status === 409) {
@@ -45,7 +39,6 @@ const Registrations = (function () {
       .fail(function (err) { if (err.status !== 401) UI.toast(err.message, 'error'); });
   }
 
-  // Number of events the user currently holds a place for
   function activeCount() {
     return Object.keys(byEvent).filter(function (id) { return byEvent[id].status === 'registered'; }).length;
   }
@@ -53,9 +46,6 @@ const Registrations = (function () {
   return { load: load, status: status, register: register, cancel: cancel, activeCount: activeCount };
 })();
 
-/**
- * EventCard: renders one event as a card. Used on the events list and dashboard.
- */
 const EventCard = (function () {
 
   function isPast(event) {
@@ -66,12 +56,12 @@ const EventCard = (function () {
   function imageHtml(event) {
     const url = event.metadata && event.metadata.image_url ? Api.fileUrl(event.metadata.image_url) : '';
     if (url) {
+      // object-top so posters show their title
       return '<img src="' + UI.escapeHtml(url) + '" alt="' + UI.escapeHtml('Image for ' + event.title) + '" loading="lazy" class="h-40 w-full object-cover object-top" onerror="this.replaceWith(EventCard.placeholder())">';
     }
     return EventCard.placeholder().outerHTML;
   }
 
-  // Shown when an event has no image (or it fails to load).
   function placeholder() {
     const div = document.createElement('div');
     div.className = 'flex h-40 w-full items-center justify-center bg-gradient-to-br from-brand-700 to-ink text-sun-400';
@@ -93,12 +83,10 @@ const EventCard = (function () {
     const title = UI.escapeHtml(event.title);
     let html = '<a href="event.html?id=' + encodeURIComponent(event.id) + '" class="btn btn-secondary btn-sm" aria-label="View details for ' + title + '">View details</a>';
 
-    // ROLE GUARD (UI): the Register button is for normal users only
-    // (data-role="user"); applyRoleVisibility removes it for admins.
+    // ROLE GUARD: Register is data-role="user", Edit/Delete are data-role="admin"
     if (!isPast(event) && !Registrations.status(event.id)) {
       html += '<button type="button" class="register-btn btn btn-primary btn-sm" data-role="user" data-id="' + UI.escapeHtml(event.id) + '" aria-label="Register for ' + title + '">Register</button>';
     }
-    // ROLE GUARD (UI): Edit and Delete are admin-only (data-role="admin").
     html += '<a href="event-form.html?id=' + encodeURIComponent(event.id) + '" class="btn btn-secondary btn-sm" data-role="admin" aria-label="Edit ' + title + '">Edit</a>';
     html += '<button type="button" class="delete-event-btn btn btn-danger btn-sm" data-role="admin" data-id="' + UI.escapeHtml(event.id) + '" data-title="' + title + '" aria-label="Delete ' + title + '">Delete</button>';
     return '<div class="mt-auto flex flex-wrap gap-2 pt-4">' + html + '</div>';
@@ -121,10 +109,7 @@ const EventCard = (function () {
       '</article>';
   }
 
-  /**
-   * Handles clicks on Register buttons inside $container (event delegation,
-   * so it also works for cards rendered later). onChange re-renders.
-   */
+  // Event delegation so it also works for cards added later
   function bindRegister($container, onChange) {
     $container.on('click', '.register-btn', function () {
       const $btn = $(this);
@@ -139,11 +124,7 @@ const EventCard = (function () {
     });
   }
 
-  /**
-   * Admin delete with a confirmation dialog. Resolves after a successful delete.
-   * ROLE GUARD (UI): only admins ever see the buttons that call this; the
-   * backend also rejects DELETE /events/:id from non-admins with 403.
-   */
+  // ROLE GUARD: only admins see delete buttons, and the API returns 403 for everyone else
   function confirmDelete(id, title, $btn) {
     const done = $.Deferred();
     UI.confirm({

@@ -1,11 +1,7 @@
-/**
- * pages/signup.js
- * Sign-up form with a live password strength meter. The password policy
- * matches the backend: 8+ characters, upper and lower case, a number and
- * a special character.
- */
+// Signup page with a password strength meter (same rules as the backend)
+
 $(function () {
-  // ROLE GUARD (guests only): signed-in users don't need to sign up.
+  // ROLE GUARD: already logged in -> go to dashboard
   if (Auth.redirectIfLoggedIn()) return;
 
   const RULES = {
@@ -22,7 +18,6 @@ $(function () {
     { label: 'strong', color: 'bg-emerald-600', text: 'text-emerald-700' }
   ];
 
-  // Returns how many rules pass (0–4) and updates the checklist.
   function checkPassword(password) {
     let passed = 0;
     $.each(RULES, function (name, test) {
@@ -84,7 +79,7 @@ $(function () {
 
     UI.setLoading($btn, true, 'Creating account…');
 
-    // Note: no "role" is ever sent. New accounts are always normal users.
+    // we never send a role, so new accounts are always normal users
     Api.post('/auth/signup', data, { silent: true })
       .then(function () {
         UI.flash('Account created! Sign in with your new password.', 'success');

@@ -1,12 +1,7 @@
-/**
- * pages/promos.js
- * Promos list (GET /promos). Each card shows a thumbnail (the video's first
- * frame, loaded only when the card scrolls into view), title, description
- * and a Play button that opens the promo page.
- * Normal users see published promos only; admins see all, with controls.
- */
+// Promos list. Thumbnails are the video's first frame, only loaded when visible.
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -14,7 +9,6 @@ $(function () {
   let items = [];
 
   function load(force) {
-    // Use the cached list if it's fresh (cleared after any admin change)
     const cached = force ? null : PromoCache.get();
     if (cached) { show(cached); return; }
 
@@ -26,7 +20,7 @@ $(function () {
   }
 
   function show(data) {
-    // ROLE GUARD (UI): normal users only ever see published promos.
+    // ROLE GUARD: normal users only see published promos
     items = data.filter(function (p) { return Auth.isAdmin() || p.published !== false; });
     render();
   }
@@ -35,8 +29,6 @@ $(function () {
     const title = UI.escapeHtml(p.title);
     return '<article class="card-hover flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white" data-id="' + UI.escapeHtml(p.id) + '">' +
       '<a href="promo.html?id=' + encodeURIComponent(p.id) + '" class="group relative block bg-slate-900" aria-label="Play ' + title + '">' +
-        // Thumbnail: a muted, silent <video> showing the first frame. Its src
-        // is only set when the card becomes visible (lazy loading).
         '<video class="thumb h-44 w-full object-cover opacity-95" muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-src="' + UI.escapeHtml(Api.fileUrl(p.video_url)) + '#t=0.5"></video>' +
         '<span class="absolute inset-0 flex items-center justify-center" aria-hidden="true">' +
           '<span class="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-xl text-brand-800 shadow transition group-hover:scale-110">▶</span></span>' +
@@ -48,7 +40,7 @@ $(function () {
         '<p class="text-sm text-slate-600">' + UI.escapeHtml(UI.truncate(p.description, 120)) + '</p>' +
         '<div class="mt-auto flex flex-wrap gap-2 pt-3">' +
           '<a href="promo.html?id=' + encodeURIComponent(p.id) + '" class="btn btn-primary btn-sm" aria-label="Play ' + title + '">▶ Play</a>' +
-          // ROLE GUARD (UI): admin-only controls
+          // ROLE GUARD: admin-only buttons
           '<button type="button" class="publish-btn btn btn-secondary btn-sm" data-role="admin" hidden>' + (p.published === false ? 'Publish' : 'Unpublish') + '</button>' +
           '<a href="promo-form.html?id=' + encodeURIComponent(p.id) + '" class="btn btn-secondary btn-sm" data-role="admin" hidden>Edit</a>' +
           '<button type="button" class="delete-btn btn btn-danger btn-sm" data-role="admin" hidden>Delete</button>' +
@@ -68,7 +60,7 @@ $(function () {
     lazyThumbs();
   }
 
-  // Lazy-load thumbnails: heavy media is only fetched when visible.
+  // lazy load the thumbnails with IntersectionObserver
   function lazyThumbs() {
     const videos = $list.find('video.thumb').toArray();
     function loadThumb(v) { v.preload = 'metadata'; v.src = v.dataset.src; }
@@ -84,7 +76,6 @@ $(function () {
     return items.filter(function (p) { return p.id === id; })[0];
   }
 
-  // ----- Admin actions -----
   $list.on('click', '.publish-btn', function () {
     const p = itemFor(this);
     ContentAdmin.setPublished('promos', 'promo', p, p.published === false, $(this))

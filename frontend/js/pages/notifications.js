@@ -1,17 +1,7 @@
-/**
- * pages/notifications.js
- * Inbox for GET /notifications: the backend returns broadcast notifications
- * (recipient_id = null) plus any sent to this user.
- *  - All / Unread tabs, "Mark all as read"
- *  - Opening one shows the full message and a link to the related event,
- *    announcement or promo (from its metadata), and marks it read.
- *  - Admins can delete (DELETE /notifications/:id).
- *
- * "Read" is stored in the browser (Layout.ReadStore) because the API has no
- * mark-as-read endpoint. Updates are optimistic: the UI changes first.
- */
+// Notifications inbox. Read status lives in localStorage (no API for it).
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -53,7 +43,7 @@ $(function () {
         .toggleClass('border-brand-700 text-brand-800', on).toggleClass('border-transparent text-slate-600', !on);
     });
     $items.attr('aria-labelledby', 'tab-' + filter);
-    Layout.updateCount();   // keep the bell count in step
+    Layout.updateCount();
 
     const shown = filter === 'unread' ? unread : list;
     if (!shown.length) {
@@ -79,7 +69,7 @@ $(function () {
             '<span class="block truncate text-sm text-slate-600">' + UI.escapeHtml(n.message) + '</span>' +
           '</span>' +
         '</button>' +
-        // ROLE GUARD (UI): admin-only delete
+        // ROLE GUARD: admin-only delete
         '<button type="button" class="delete-btn btn btn-secondary btn-sm self-center text-red-700" data-role="admin" hidden data-id="' + UI.escapeHtml(n.id) + '" aria-label="Delete notification: ' + UI.escapeHtml(n.title) + '">Delete</button>' +
       '</li>';
     }).join(''));
@@ -93,7 +83,8 @@ $(function () {
       return;
     }
     selectedId = id;
-    ReadStore.markRead(id);   // optimistic: marked read as soon as it's opened
+    // mark it read as soon as it's opened
+    ReadStore.markRead(id);
     history.replaceState(null, '', 'notifications.html?id=' + encodeURIComponent(id));
 
     const link = Layout.notificationLink(n);
@@ -113,7 +104,6 @@ $(function () {
     if (moveFocus) $('#detail-title').trigger('focus');
   }
 
-  // ----- Events -----
   $items.on('click', '.open-btn', function () { select($(this).data('id'), true); });
 
   $('[role=tab]').on('click', function () { filter = $(this).data('filter'); render(); });
@@ -130,8 +120,7 @@ $(function () {
     UI.toast('All notifications marked as read.', 'success');
   });
 
-  // Admin delete: remove from the list straight away (optimistic UI), and put
-  // it back if the server refuses.
+  // Delete: remove it from the list straight away, put it back if the request fails
   $('main').on('click', '.delete-btn', function () {
     const id = $(this).data('id');
     const n = list.filter(function (x) { return x.id === id; })[0];
@@ -151,7 +140,7 @@ $(function () {
       Api.del('/notifications/' + encodeURIComponent(id), { silent: true })
         .then(function () { UI.toast('Notification deleted.', 'success'); Layout.refreshBell(); })
         .fail(function (err) {
-          list.splice(index, 0, n);   // revert
+          list.splice(index, 0, n);
           render();
           if (err.status !== 401) UI.toast("Couldn't delete the notification: " + err.message, 'error');
         });

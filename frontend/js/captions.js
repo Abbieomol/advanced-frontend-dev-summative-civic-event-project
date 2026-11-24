@@ -1,10 +1,6 @@
-/**
- * captions.js
- * The backend stores a promo's captions as plain text (caption_text), not as
- * a caption file. A <track> element needs a WebVTT file, so we build one in
- * the browser: the text is split into sentences, spread over the video's
- * length in proportion to each sentence's length, and turned into a Blob URL that the <track> can load.
- */
+// The backend stores captions as plain text, but <track> needs a WebVTT file.
+// So we build one in the browser: one cue per sentence, timed by sentence length.
+
 const Captions = (function () {
 
   function stamp(seconds) {
@@ -13,9 +9,8 @@ const Captions = (function () {
     return pad(h) + ':' + pad(m) + ':' + pad(Math.floor(s)) + '.' + pad(Math.round((s % 1) * 1000), 3);
   }
 
-  // Split into short cues: sentences, then long sentences into ~12-word chunks.
   function cues(text) {
-    // Split only where . ! or ? is followed by a space, so "p.m." or "e.g." stay whole.
+    // only split when a space follows . ! ? so "p.m." stays together
     const sentences = String(text).replace(/\s+/g, ' ').trim().split(/(?<=[.!?])\s+/).filter(Boolean);
     const out = [];
     sentences.forEach(function (s) {
@@ -25,15 +20,10 @@ const Captions = (function () {
     return out.filter(Boolean);
   }
 
-  /**
-   * Returns a Blob URL for a WebVTT file covering `duration` seconds.
-   * If the duration is unknown, each cue gets 4 seconds.
-   */
   function toVttUrl(text, duration) {
     const parts = cues(text);
     if (!parts.length) return null;
-    // Longer sentences take longer to say, so each cue gets time in proportion
-    // to its number of characters (keeps captions in step with the narration).
+    // longer sentences get more time on screen
     const total = isFinite(duration) && duration > 0 ? duration : parts.length * 4;
     const chars = parts.reduce(function (sum, p) { return sum + p.length; }, 0);
     let vtt = 'WEBVTT\n\n', t = 0;

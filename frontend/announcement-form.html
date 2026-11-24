@@ -27,13 +27,11 @@
           <input id="title" type="text" required maxlength="200" class="input">
         </div>
 
-        <!-- Audio upload: multipart/form-data, file key "audio" -->
         <div class="field" id="audio-field">
           <label for="audio" class="label">Audio file <span aria-hidden="true">*</span></label>
           <p id="audio-hint" class="mb-2 text-sm text-slate-600">MP3, WAV, M4A or OGG, up to 5 MB.</p>
           <input id="audio" type="file" accept=".mp3,.wav,.m4a,.ogg,audio/*" aria-describedby="audio-hint"
             class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-700 file:px-4 file:py-2 file:font-semibold file:text-white hover:file:bg-brand-800">
-          <!-- Preview of the chosen (or current) file -->
           <div id="audio-preview" class="mt-3 hidden">
             <p class="text-sm font-semibold text-slate-700" id="preview-label">Preview</p>
             <audio controls preload="metadata" class="mt-1 w-full" aria-labelledby="preview-label"></audio>

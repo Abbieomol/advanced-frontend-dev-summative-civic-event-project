@@ -1,11 +1,7 @@
-/**
- * pages/announcement.js
- * Announcement detail (GET /announcements/:id): an accessible audio player
- * with play/pause, back/forward 10 seconds, speed, current time / duration,
- * the browser's own controls as well, and fallback text with a download link.
- */
+// Announcement page with an accessible audio player
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -22,7 +18,7 @@ $(function () {
     Api.get('/announcements/' + encodeURIComponent(id), null, { silent: true })
       .then(function (res) {
         item = res.data;
-        // ROLE GUARD (UI): unpublished announcements are hidden from normal users.
+        // ROLE GUARD: unpublished ones are hidden from normal users
         if (item.published === false && !Auth.isAdmin()) {
           $detail.html(UI.emptyState('Announcement not available', "This announcement isn't published.", 'announcements.html', 'All announcements'));
           return;
@@ -37,7 +33,6 @@ $(function () {
       .always(function () { $detail.attr('aria-busy', 'false'); });
   }
 
-  // Guess the MIME type from the file extension for the <source> element
   function mimeFor(url) {
     const ext = (url.split('?')[0].split('.').pop() || '').toLowerCase();
     return { mp3: 'audio/mpeg', wav: 'audio/wav', m4a: 'audio/mp4', ogg: 'audio/ogg' }[ext] || '';
@@ -46,7 +41,7 @@ $(function () {
   function render() {
     const url = Api.fileUrl(item.audio_url);
     $detail.html(
-      // ROLE GUARD (UI): admin toolbar
+      // ROLE GUARD: admin toolbar
       '<div class="mb-3 flex flex-wrap items-center gap-2" data-role="admin" hidden>' + UI.statusBadge(item.published) +
         '<button type="button" id="publish-btn" class="btn btn-secondary btn-sm">' + (item.published === false ? 'Publish' : 'Unpublish') + '</button>' +
         '<a href="announcement-form.html?id=' + encodeURIComponent(item.id) + '" class="btn btn-secondary btn-sm">Edit</a>' +
@@ -69,10 +64,9 @@ $(function () {
             '<option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option></select></label>' +
           '<label class="flex items-center gap-2">Volume <input id="volume" type="range" min="0" max="1" step="0.05" value="1" class="accent-brand-700"></label>' +
         '</div>' +
-        // The browser's own player is kept too (fully keyboard accessible).
+        // keep the browser's own controls too, with fallback text
         '<audio id="audio" controls preload="metadata" class="mt-4 w-full">' +
           '<source src="' + UI.escapeHtml(url) + '"' + (mimeFor(url) ? ' type="' + mimeFor(url) + '"' : '') + '>' +
-          // Fallback text for browsers that can't play the format
           '<p>Your browser can\'t play this audio. <a class="underline" href="' + UI.escapeHtml(url) + '" download>Download the audio file</a> instead.</p>' +
         '</audio>' +
         '<p id="audio-error" class="mt-3 hidden rounded-lg bg-red-50 p-3 text-sm text-red-900" role="alert">This audio format can\'t be played in your browser. ' +
@@ -119,7 +113,6 @@ $(function () {
     $('#volume').on('input', function () { audio.volume = Number(this.value); });
   }
 
-  // ----- Admin actions -----
   $detail.on('click', '#publish-btn', function () {
     ContentAdmin.setPublished('announcements', 'announcement', item, item.published === false, $(this))
       .then(function (updated) { $.extend(item, updated); render(); Layout.refreshBell(); });

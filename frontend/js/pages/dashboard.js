@@ -1,10 +1,7 @@
-/**
- * pages/dashboard.js
- * Home page after login: greeting, the user's activity numbers
- * (GET /dashboard/me) and the next three upcoming events.
- */
+// Home page: greeting, my stats and the next 3 events
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -13,14 +10,12 @@ $(function () {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   $('#greeting').text(greeting + ', ' + user.full_name.split(' ')[0]);
 
-  // Sent here by Auth.requireAdmin() when a normal user opened an admin page
   if (UI.param('denied')) {
     UI.toast("That page is for administrators only. If you need access, contact " + CONFIG.SUPPORT_EMAIL + '.', 'error');
     history.replaceState(null, '', 'dashboard.html');
   }
 
-  // Load the user's registrations once and share the result between sections
-  // (re-fetch only if the previous attempt failed).
+  // load registrations once and share it between the two sections
   let regsPromise = null;
   function registrations() {
     if (!regsPromise || regsPromise.state() === 'rejected') regsPromise = Registrations.load();
@@ -38,12 +33,11 @@ $(function () {
     $.when(Api.get('/dashboard/me', null, { silent: true }), registrations())
       .then(function (res) {
         const d = res.data || {};
-        // Postgres COUNT() comes back as a string, so convert with Number().
-        // The API's registration count includes cancelled ones, so we count
-        // active registrations from the registrations list instead.
+        // the API count includes cancelled ones, so count active ones ourselves.
+        // COUNT() comes back as a string, hence Number()
         const active = Registrations.activeCount();
         const cards = [];
-        // ROLE GUARD (UI): registrations and feedback only apply to normal users.
+        // ROLE GUARD: registrations/feedback stats only make sense for normal users
         if (!Auth.isAdmin()) {
           cards.push(statCard('My registrations', active, 'my-registrations.html'));
           cards.push(statCard('Feedback given', Number((d.feedbacks || {}).total_feedbacks || 0), 'my-registrations.html'));
@@ -75,7 +69,6 @@ $(function () {
       .always(function () { $up.attr('aria-busy', 'false'); });
   }
 
-  // After registering from a card, redraw the cards and refresh the numbers.
   EventCard.bindRegister($('#upcoming'), function () { loadUpcoming(); loadStats(); });
   EventCard.bindDelete($('#upcoming'), function () { loadUpcoming(); });
   loadStats();

@@ -1,26 +1,20 @@
-/**
- * pages/announcements.js
- * Announcements list (GET /announcements). Each card shows the title, length,
- * date and a play button that plays the audio right on the page.
- * Normal users only see published announcements; admins see all of them,
- * with publish/unpublish, edit and delete controls.
- */
+// Announcements list. Play buttons use one shared Audio so only one plays at a time.
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
   const $list = $('#list');
   let items = [];
-  const player = new Audio();   // one shared player, so only one plays at a time
+  const player = new Audio();
   let playingId = null;
 
   function load() {
     $list.attr('aria-busy', 'true').html(UI.skeletonRows(4));
-    // The API pages results (20 by default), so ask for plenty.
     Api.get('/announcements', { limit: 100 }, { silent: true })
       .then(function (res) {
-        // ROLE GUARD (UI): normal users only ever see published announcements.
+        // ROLE GUARD: normal users only see published ones
         items = (res.data || []).filter(function (a) { return Auth.isAdmin() || a.published !== false; });
         render();
       })
@@ -35,7 +29,6 @@ $(function () {
         'aria-pressed="' + playing + '" aria-label="' + (playing ? 'Pause ' : 'Play ') + UI.escapeHtml(a.title) + '">' +
         '<span aria-hidden="true" class="text-lg">' + (playing ? '❚❚' : '▶') + '</span></button>' +
       '<div class="min-w-0 flex-1">' +
-        // ROLE GUARD (UI): published/unpublished badge is only useful to admins
         '<div class="mb-1" data-role="admin" hidden>' + UI.statusBadge(a.published) + '</div>' +
         '<h2 class="font-semibold leading-snug"><a class="hover:underline" href="announcement.html?id=' + encodeURIComponent(a.id) + '">' + UI.escapeHtml(a.title) + '</a></h2>' +
         '<p class="mt-1 text-sm text-slate-600">' +
@@ -43,7 +36,7 @@ $(function () {
           ' · <time datetime="' + UI.escapeHtml(a.created_at) + '">' + UI.escapeHtml(UI.formatDate(a.created_at)) + '</time></p>' +
         '<div class="mt-3 flex flex-wrap gap-2">' +
           '<a href="announcement.html?id=' + encodeURIComponent(a.id) + '" class="btn btn-secondary btn-sm" aria-label="Open ' + UI.escapeHtml(a.title) + '">Open</a>' +
-          // ROLE GUARD (UI): admin-only controls
+          // ROLE GUARD: admin-only buttons
           '<button type="button" class="publish-btn btn btn-secondary btn-sm" data-role="admin" hidden>' + (a.published === false ? 'Publish' : 'Unpublish') + '</button>' +
           '<a href="announcement-form.html?id=' + encodeURIComponent(a.id) + '" class="btn btn-secondary btn-sm" data-role="admin" hidden>Edit</a>' +
           '<button type="button" class="delete-btn btn btn-danger btn-sm" data-role="admin" hidden>Delete</button>' +
@@ -63,8 +56,8 @@ $(function () {
     loadDurations();
   }
 
-  // The API doesn't store a duration, so read it from each file's metadata.
   const durationCache = {};
+  // the API doesn't store the length, so read it from each file
   function loadDurations() {
     $list.find('.duration').each(function () {
       const $d = $(this), src = $d.data('src');
@@ -85,11 +78,10 @@ $(function () {
     return items.filter(function (a) { return a.id === id; })[0];
   }
 
-  // ----- Inline playback -----
   $list.on('click', '.play-btn', function () {
     const a = itemFor(this);
     if (playingId === a.id) { player.pause(); return; }
-    switching = true; // changing src fires a "pause" event we should ignore
+    switching = true;
     player.src = Api.fileUrl(a.audio_url);
     player.play()
       .then(function () { switching = false; })
@@ -102,6 +94,7 @@ $(function () {
     render();
     $list.find('[data-id="' + a.id + '"] .play-btn').trigger('focus');
   });
+  // changing the src fires a "pause" event, ignore that one
   let switching = false;
   function stopped() {
     if (switching) return;
@@ -111,7 +104,6 @@ $(function () {
   player.addEventListener('pause', stopped);
   player.addEventListener('ended', stopped);
 
-  // ----- Admin actions -----
   $list.on('click', '.publish-btn', function () {
     const a = itemFor(this);
     ContentAdmin.setPublished('announcements', 'announcement', a, a.published === false, $(this))

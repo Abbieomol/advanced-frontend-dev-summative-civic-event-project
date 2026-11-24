@@ -1,13 +1,8 @@
-/**
- * pages/announcement-form.js
- * Admin create (POST /announcements, multipart with file key "audio") and
- * edit (PUT /announcements/:id) form.
- *
- * Backend note: PUT only updates title and published. It ignores a new audio
- * file, so in edit mode the file picker is replaced by the current audio.
- */
+// Admin form for announcements. The backend ignores a new audio file on edit,
+// so editing only changes the title and published status.
+
 $(function () {
-  // ROLE GUARD (admins only)
+  // ROLE GUARD: admins only
   if (!Auth.requireAdmin()) return;
   Layout.init();
 
@@ -39,7 +34,6 @@ $(function () {
       .fail(function (err) { UI.formAlert($form, err.status === 404 ? 'This announcement no longer exists.' : err.message); });
   }
 
-  // Check type/size before upload, then preview the chosen file
   $form.on('change', '#audio', function () {
     UI.clearErrors($form);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -77,7 +71,6 @@ $(function () {
 
     request
       .then(function (res) {
-        // The backend creates a notification for every new announcement.
         UI.flash(editId ? 'Announcement updated.' : 'Announcement created. Residents have been notified.', 'success');
         window.location.replace('announcement.html?id=' + encodeURIComponent(res.data.id));
       })

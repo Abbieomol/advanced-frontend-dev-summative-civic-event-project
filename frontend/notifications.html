@@ -20,7 +20,7 @@
       <button type="button" id="mark-all" class="btn btn-secondary">Mark all as read</button>
     </div>
 
-    <!-- ROLE GUARD (UI): admin explanation of the delete controls -->
+    <!-- ROLE GUARD: admins only -->
     <p class="mt-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-900" data-role="admin" hidden>
       <strong>Admin:</strong> deleting a notification removes it for every resident. New notifications are created automatically when you publish events, announcements or promos.
     </p>
@@ -32,7 +32,6 @@
 
     <div class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
       <ul id="notif-items" role="tabpanel" aria-labelledby="tab-all" class="space-y-2" aria-busy="true"></ul>
-      <!-- Detail of the selected notification -->
       <section id="notif-detail" class="h-fit rounded-xl border border-slate-200 bg-white p-6 lg:sticky lg:top-24" aria-live="polite" aria-label="Notification details">
         <p class="text-slate-600">Select a notification to read it in full.</p>
       </section>

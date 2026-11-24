@@ -1,13 +1,9 @@
-/**
- * pages/my-registrations.js
- * Lists the signed-in user's registrations (GET /event-registrations/my-registrations),
- * split into Upcoming, Past and Cancelled tabs, with a Cancel option.
- */
+// My registrations: upcoming / past / cancelled tabs
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
-  // ROLE GUARD (normal users only): admins don't register for events, so
-  // they are sent to the events list instead.
+  // ROLE GUARD: admins don't register, send them to events
   if (Auth.isAdmin()) { window.location.replace('events.html'); return; }
   Layout.init();
 
@@ -54,7 +50,6 @@ $(function () {
   }
 
   function render() {
-    // Update tab counts and selected state
     ['upcoming', 'past', 'cancelled'].forEach(function (tab) {
       const n = registrations.filter(function (r) { return groupOf(r) === tab; }).length;
       const $tab = $('[data-tab="' + tab + '"]');
@@ -79,8 +74,8 @@ $(function () {
     }
   }
 
-  // Tabs: click, or arrow keys to move between them (WAI-ARIA tabs pattern)
   $('[role=tab]').on('click', function () { activeTab = $(this).data('tab'); render(); });
+  // arrow keys switch tabs
   $('[role=tablist]').on('keydown', '[role=tab]', function (e) {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
     const $tabs = $('[role=tab]');

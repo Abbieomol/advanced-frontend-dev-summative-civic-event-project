@@ -1,11 +1,7 @@
-/**
- * pages/promo.js
- * Promo detail (GET /promos/:id): HTML5 video with an English captions track
- * that is ON by default, a captions on/off button, the browser's controls
- * (play/pause, volume, fullscreen), and a full transcript below the video.
- */
+// Promo page: video with captions on by default, a CC toggle and a transcript
+
 $(function () {
-  // ROLE GUARD (signed-in users)
+  // ROLE GUARD: logged-in users only
   if (!Auth.requireLogin()) return;
   Layout.init();
 
@@ -22,7 +18,7 @@ $(function () {
     Api.get('/promos/' + encodeURIComponent(id), null, { silent: true })
       .then(function (res) {
         item = res.data;
-        // ROLE GUARD (UI): unpublished promos are hidden from normal users.
+        // ROLE GUARD: unpublished promos are hidden from normal users
         if (item.published === false && !Auth.isAdmin()) {
           $detail.html(UI.emptyState('Promo not available', "This promo isn't published.", 'promos.html', 'All promos'));
           return;
@@ -42,14 +38,13 @@ $(function () {
     const hasCaptions = !!$.trim(item.caption_text || '');
 
     $detail.html(
-      // ROLE GUARD (UI): admin toolbar
+      // ROLE GUARD: admin toolbar
       '<div class="mb-3 flex flex-wrap items-center gap-2" data-role="admin" hidden>' + UI.statusBadge(item.published) +
         '<button type="button" id="publish-btn" class="btn btn-secondary btn-sm">' + (item.published === false ? 'Publish' : 'Unpublish') + '</button>' +
         '<a href="promo-form.html?id=' + encodeURIComponent(item.id) + '" class="btn btn-secondary btn-sm">Edit</a>' +
         '<button type="button" id="delete-btn" class="btn btn-danger btn-sm">Delete</button></div>' +
 
-      // No fixed aspect ratio: square or portrait videos keep their shape
-      // (centred, at most 70% of the screen height) instead of being stretched.
+      // no fixed aspect ratio so square videos keep their shape
       '<div class="overflow-hidden rounded-2xl bg-ink">' +
         '<video id="video" controls playsinline preload="metadata" class="mx-auto block max-h-[70vh] w-full object-contain" aria-label="' + UI.escapeHtml(item.title) + '">' +
           '<source src="' + UI.escapeHtml(url) + '">' +
@@ -81,7 +76,7 @@ $(function () {
     video.addEventListener('error', function () { $('#video-error').removeClass('hidden'); }, true);
     if (!hasCaptions) return;
 
-    // Build the captions track once we know the video's length, then show it.
+    // build the captions once we know how long the video is
     function addTrack() {
       if (video.querySelector('track')) return;
       const src = Captions.toVttUrl(item.caption_text, video.duration);
@@ -92,11 +87,10 @@ $(function () {
       track.src = src;
       track.default = true;
       video.appendChild(track);
-      // "default" isn't always honoured for tracks added by script, so force it on.
+      // "default" doesn't always work for tracks added with JS, so force it on
       setTimeout(function () { if (video.textTracks[0]) video.textTracks[0].mode = 'showing'; }, 0);
     }
     if (video.readyState >= 1) addTrack(); else video.addEventListener('loadedmetadata', addTrack);
-    // If metadata never loads (e.g. unsupported format), still add timed captions.
     setTimeout(addTrack, 3000);
 
     $('#cc-toggle').on('click', function () {
@@ -108,7 +102,6 @@ $(function () {
     });
   }
 
-  // ----- Admin actions -----
   $detail.on('click', '#publish-btn', function () {
     ContentAdmin.setPublished('promos', 'promo', item, item.published === false, $(this))
       .then(function (updated) { $.extend(item, updated); render(); Layout.refreshBell(); });

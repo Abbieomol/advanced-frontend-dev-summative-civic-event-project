@@ -1,15 +1,8 @@
-/**
- * pages/admin-users.js
- * User management (admins only):
- *  - list users (GET /users), search and filter
- *  - view one user (GET /users/:id) in a dialog
- *  - enable / disable (PATCH /users/:id/enable | /disable)
- * Per the project rules, admins can NOT change anyone's role from the UI,
- * so there is no role control anywhere on this page.
- */
+// Admin user management: list, view, enable/disable.
+// No role editing on purpose - admins aren't allowed to change roles.
+
 $(function () {
-  // ROLE GUARD (admins only): normal users are redirected; the API also
-  // requires the admin role for every /users endpoint used here.
+  // ROLE GUARD: admins only
   if (!Auth.requireAdmin()) return;
   Layout.init();
 
@@ -37,7 +30,7 @@ $(function () {
     });
   }
 
-  // Accessible on/off switch (role="switch" + aria-checked)
+  // on/off switch (role="switch"). You can't disable your own account.
   function switchHtml(u) {
     const on = u.is_active !== false;
     const self = me && u.id === me.id;
@@ -75,11 +68,11 @@ $(function () {
     );
   }
 
-  // ----- Enable / disable -----
   function setActive(u, active) {
     const action = active ? 'enable' : 'disable';
     const previous = u.is_active;
-    u.is_active = active; render(); // optimistic
+    // update the UI first, undo it if the request fails
+    u.is_active = active; render();
     return Api.patch('/users/' + encodeURIComponent(u.id) + '/' + action, {}, { silent: true })
       .then(function (res) {
         $.extend(u, res.data);
@@ -87,7 +80,7 @@ $(function () {
         UI.toast(u.full_name + (active ? ' can use their account again.' : '\'s account has been disabled.'), 'success');
       })
       .fail(function (err) {
-        u.is_active = previous; render(); // revert
+        u.is_active = previous; render();
         if (err.status !== 401) UI.toast("Couldn't " + action + ' the account: ' + err.message, 'error');
       })
       .always(function () { $users.find('.status-switch[data-id="' + u.id + '"]').trigger('focus'); });
@@ -110,7 +103,6 @@ $(function () {
     }
   });
 
-  // ----- View one user (GET /users/:id) -----
   const $dialog = $('#user-dialog');
   let opener = null;
 
@@ -148,7 +140,6 @@ $(function () {
   $dialog.on('click', function (e) { if (e.target === this) closeDialog(); });
   $dialog.find('.dialog-close').on('click', closeDialog);
 
-  // ----- Filters -----
   $('#q').on('input', render);
   $('#role, #status').on('change', render);
   $('#filters').on('submit', function (e) { e.preventDefault(); });

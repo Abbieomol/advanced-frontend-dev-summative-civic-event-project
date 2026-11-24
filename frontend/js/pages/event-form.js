@@ -1,12 +1,8 @@
-/**
- * pages/event-form.js
- * Admin create (POST /events) and edit (PUT /events/:id) form.
- * Sent as multipart/form-data so an image can be included (file key "image").
- * Opened as event-form.html (new) or event-form.html?id=<event id> (edit).
- */
+// Admin form to create or edit an event (event-form.html?id=... to edit).
+// Sent as FormData so the image can go with it.
+
 $(function () {
-  // ROLE GUARD (admins only): normal users are sent away before anything loads.
-  // The backend also requires the admin role for POST/PUT /events.
+  // ROLE GUARD: admins only
   if (!Auth.requireAdmin()) return;
   Layout.init();
 
@@ -15,7 +11,7 @@ $(function () {
   const $submit = $form.find('[type=submit]');
   let currentImageUrl = '';
 
-  // datetime-local needs "YYYY-MM-DDTHH:MM" in local time
+  // datetime-local inputs want "YYYY-MM-DDTHH:MM" in local time
   function toLocalInput(iso) {
     if (!iso) return '';
     const d = new Date(iso);
@@ -29,7 +25,6 @@ $(function () {
       : 'No image chosen');
   }
 
-  // ----- Edit mode: load the event and fill the form -----
   if (editId) {
     $('#form-title').text('Edit event');
     document.title = 'Edit event · ' + CONFIG.APP_NAME;
@@ -55,7 +50,7 @@ $(function () {
       });
   }
 
-  // ----- Image picker: check type and size, then preview before upload -----
+  // check the image and show a preview before uploading
   $('#image').on('change', function () {
     UI.clearErrors($form);
     const file = this.files[0];
@@ -78,7 +73,6 @@ $(function () {
     $('#image').val('').trigger('change').trigger('focus');
   });
 
-  // ----- Submit -----
   $form.on('submit', function (e) {
     e.preventDefault();
     UI.clearErrors($form);
@@ -98,7 +92,6 @@ $(function () {
     }
     if (!valid) { $form.find('[aria-invalid=true]').first().trigger('focus'); return; }
 
-    // Build multipart form data; dates are sent as ISO strings (with timezone).
     const data = new FormData();
     data.append('title', title);
     data.append('description', $.trim($('#description').val()));

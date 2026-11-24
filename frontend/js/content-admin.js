@@ -1,14 +1,8 @@
-/**
- * content-admin.js
- * Admin actions shared by announcements and promos:
- * publish / unpublish (PATCH /:id/publish|unpublish) and delete (DELETE /:id).
- *
- * ROLE GUARD (UI): pages only show the buttons that call these to admins
- * (data-role="admin"). The backend rejects these requests from normal users (403).
- */
+// Admin actions shared by announcements and promos: publish/unpublish and delete.
+// ROLE GUARD: only admins see the buttons that call these (backend checks too).
+
 const ContentAdmin = (function () {
 
-  // resource: 'announcements' | 'promos'; noun: 'announcement' | 'promo'
   function setPublished(resource, noun, item, publish, $btn) {
     if ($btn) UI.setLoading($btn, true, publish ? 'Publishing…' : 'Unpublishing…');
     return Api.patch('/' + resource + '/' + encodeURIComponent(item.id) + (publish ? '/publish' : '/unpublish'), {})
@@ -46,11 +40,7 @@ const ContentAdmin = (function () {
   return { setPublished: setPublished, remove: remove };
 })();
 
-/**
- * PromoCache: the promos list is cached in sessionStorage for a minute
- * (CONFIG.PROMOS_CACHE_MS) so moving between pages doesn't re-download it.
- * Any create, update, publish or delete calls PromoCache.clear().
- */
+// Cache the promos list for a minute. Cleared whenever an admin changes something.
 const PromoCache = {
   KEY: 'ce_promos_cache',
   get: function () {
