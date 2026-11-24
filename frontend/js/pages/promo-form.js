@@ -19,7 +19,7 @@ $(function () {
     document.title = 'Edit promo · ' + CONFIG.APP_NAME;
     $submit.text('Save changes');
     $('#video-required').remove();
-    $('#video-hint').text('MP4, MOV, AVI or MKV, up to 8 MB. Choose a file only if you want to replace the current video.');
+    $('#video-hint').text('MP4, MOV, AVI or MKV, up to 8 MB.');
     $form.find('input, textarea, button').prop('disabled', true);
 
     Api.get('/promos/' + encodeURIComponent(editId), null, { silent: true })

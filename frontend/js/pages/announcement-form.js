@@ -20,7 +20,7 @@ $(function () {
     document.title = 'Edit announcement · ' + CONFIG.APP_NAME;
     $submit.text('Save changes');
     $('#audio').closest('.field').find('label[for=audio], #audio-hint, #audio').remove();
-    $('#audio-field').prepend('<p class="label">Current audio</p><p class="mb-2 text-sm text-slate-600">The audio can\'t be replaced after upload. To use a different recording, create a new announcement and delete this one.</p>');
+    $('#audio-field').prepend('<p class="label">Current audio</p>');
     $form.find('input, button').prop('disabled', true);
 
     Api.get('/announcements/' + encodeURIComponent(editId), null, { silent: true })

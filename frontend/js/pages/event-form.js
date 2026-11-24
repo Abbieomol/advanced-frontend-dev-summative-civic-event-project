@@ -41,7 +41,7 @@ $(function () {
         $('#ends_at').val(toLocalInput(e.ends_at));
         currentImageUrl = e.metadata && e.metadata.image_url ? Api.fileUrl(e.metadata.image_url) : '';
         showPreview(currentImageUrl, 'Current image for ' + e.title);
-        $('#image-hint').text('JPG, PNG or GIF, up to 2 MB. Choose a file only if you want to replace the current image.');
+        $('#image-hint').text('JPG, PNG or GIF, up to 2 MB.');
         $('nav[aria-label=Breadcrumb] a').attr('href', 'event.html?id=' + encodeURIComponent(editId)).text('‹ Back to event');
         $form.find('input, textarea, button').prop('disabled', false);
       })
